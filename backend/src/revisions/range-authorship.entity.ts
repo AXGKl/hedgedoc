@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2021 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -17,18 +17,18 @@ import { Author } from '../authors/author.entity';
 import { Revision } from './revision.entity';
 
 /**
- * The Edit represents a change in the content of a note by a particular {@link Author}
+ * The RangeAuthorship represents a change in the content of a note by a particular {@link Author}
  */
 @Entity()
-export class Edit {
+export class RangeAuthorship {
   @PrimaryGeneratedColumn()
   id: number;
 
   /**
    * Revisions this edit appears in
    */
-  @ManyToMany((_) => Revision, (revision) => revision.edits)
-  revisions: Promise<Revision[]>;
+  @ManyToOne((_) => Revision, (revision) => revision.rangeAuthorships)
+  revision: Promise<Revision>;
 
   /**
    * Author that created the change
@@ -55,9 +55,10 @@ export class Edit {
     author: Author,
     startPos: number,
     endPos: number,
-  ): Omit<Edit, 'id' | 'createdAt' | 'updatedAt'> {
-    const newEdit = new Edit();
-    newEdit.revisions = Promise.resolve([]);
+    revision: Revision,
+  ): Omit<RangeAuthorship, 'id' | 'createdAt' | 'updatedAt'> {
+    const newEdit = new RangeAuthorship();
+    newEdit.revision = Promise.resolve(revision);
     newEdit.author = Promise.resolve(author);
     newEdit.startPos = startPos;
     newEdit.endPos = endPos;

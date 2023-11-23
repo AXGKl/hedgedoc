@@ -1,12 +1,14 @@
 /*
- * SPDX-FileCopyrightText: 2022 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import type { ChangeSpec, Transaction } from '@codemirror/state'
 import { Annotation } from '@codemirror/state'
 import type { EditorView, PluginValue, ViewUpdate } from '@codemirror/view'
-import type { Text as YText, Transaction as YTransaction, YTextEvent } from 'yjs'
+import type { Text as YText, Transaction as YTransaction, YTextEvent, Array as YArray } from 'yjs'
+import type { RelativePositionAuthorship, ShortRealtimeUser } from '@hedgedoc/commons'
+import { createRelativePositionFromTypeIndex } from 'yjs'
 
 const syncAnnotation = Annotation.define()
 
@@ -19,6 +21,8 @@ export class YTextSyncViewPlugin implements PluginValue {
   constructor(
     private view: EditorView,
     private readonly yText: YText,
+    private readonly yArrayPositions: YArray<RelativePositionAuthorship>,
+    private readonly ownUser: ShortRealtimeUser,
     pluginLoaded: () => void
   ) {
     this.observer = this.onYTextUpdate.bind(this)
@@ -34,7 +38,7 @@ export class YTextSyncViewPlugin implements PluginValue {
   }
 
   private calculateChanges(event: YTextEvent): ChangeSpec[] {
-    const [changes] = event.delta.reduce(
+    const [changes] = event.delta.reduce<[ChangeSpec[], number]>(
       ([changes, position], delta) => {
         if (delta.insert !== undefined && typeof delta.insert === 'string') {
           changes.push({ from: position, to: position, insert: delta.insert })
@@ -48,7 +52,7 @@ export class YTextSyncViewPlugin implements PluginValue {
           return [changes, position]
         }
       },
-      [[], 0] as [ChangeSpec[], number]
+      [[], 0]
     )
     return changes
   }
@@ -72,6 +76,9 @@ export class YTextSyncViewPlugin implements PluginValue {
         }
         if (insertText.length > 0) {
           this.yText.insert(fromA + positionAdjustment, insertText)
+          this.yArrayPositions.insert(0, [
+            [createRelativePositionFromTypeIndex(this.yText, fromA + positionAdjustment), this.ownUser]
+          ])
         }
         positionAdjustment += insertText.length - (toA - fromA)
       })

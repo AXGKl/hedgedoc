@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -320,12 +320,12 @@ export class NotesService {
    */
   async calculateUpdateUser(note: Note): Promise<User | null> {
     const lastRevision = await this.revisionsService.getLatestRevision(note);
-    const edits = await lastRevision.edits;
-    if (edits.length > 0) {
+    const rangeAuthorships = await lastRevision.rangeAuthorships;
+    if (rangeAuthorships.length > 0) {
       // Sort the last Revisions Edits by their updatedAt Date to get the latest one
       // the user of that Edit is the updateUser
       return await (
-        await edits.sort(
+        await rangeAuthorships.sort(
           (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
         )[0].author
       ).user;

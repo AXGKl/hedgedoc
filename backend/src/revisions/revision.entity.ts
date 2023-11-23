@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2021 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -10,12 +10,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { Note } from '../notes/note.entity';
 import { Tag } from '../notes/tag.entity';
-import { Edit } from './edit.entity';
+import { RangeAuthorship } from './range-authorship.entity';
 
 /**
  * The state of a note at a particular point in time,
@@ -84,9 +85,12 @@ export class Revision {
   /**
    * All edit objects which are used in the revision.
    */
-  @ManyToMany((_) => Edit, (edit) => edit.revisions)
-  @JoinTable()
-  edits: Promise<Edit[]>;
+  @OneToMany(
+    (_) => RangeAuthorship,
+    (rangeAuthorship) => rangeAuthorship.revision,
+    { onDelete: 'CASCADE' },
+  )
+  rangeAuthorships: Promise<RangeAuthorship[]>;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
@@ -108,7 +112,7 @@ export class Revision {
     newRevision.description = description;
     newRevision.tags = Promise.resolve(tags);
     newRevision.note = Promise.resolve(note);
-    newRevision.edits = Promise.resolve([]);
+    newRevision.rangeAuthorships = Promise.resolve([]);
     newRevision.yjsStateVector = yjsStateVector ?? null;
     return newRevision;
   }

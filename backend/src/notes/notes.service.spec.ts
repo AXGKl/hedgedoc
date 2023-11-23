@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -41,7 +41,7 @@ import { LoggerModule } from '../logger/logger.module';
 import { NoteGroupPermission } from '../permissions/note-group-permission.entity';
 import { NoteUserPermission } from '../permissions/note-user-permission.entity';
 import { RealtimeNoteModule } from '../realtime/realtime-note/realtime-note.module';
-import { Edit } from '../revisions/edit.entity';
+import { RangeAuthorship } from '../revisions/edit.entity';
 import { Revision } from '../revisions/revision.entity';
 import { RevisionsModule } from '../revisions/revisions.module';
 import { RevisionsService } from '../revisions/revisions.service';
@@ -187,7 +187,7 @@ describe('NotesService', () => {
       .useValue({})
       .overrideProvider(getRepositoryToken(Identity))
       .useValue({})
-      .overrideProvider(getRepositoryToken(Edit))
+      .overrideProvider(getRepositoryToken(RangeAuthorship))
       .useValue({})
       .overrideProvider(getRepositoryToken(Revision))
       .useClass(Repository)
@@ -236,13 +236,13 @@ describe('NotesService', () => {
           endPos: 1,
           updatedAt: new Date(1549312452000),
           author: Promise.resolve(author),
-        } as Edit,
+        } as RangeAuthorship,
         {
           startPos: 0,
           endPos: 1,
           updatedAt: new Date(1549312452001),
           author: Promise.resolve(author),
-        } as Edit,
+        } as RangeAuthorship,
       ]),
       createdAt: new Date(1549312452000),
       tags: Promise.resolve([

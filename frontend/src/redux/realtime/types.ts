@@ -1,9 +1,9 @@
 /*
- * SPDX-FileCopyrightText: 2022 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import type { RealtimeUser } from '@hedgedoc/commons'
+import type { RealtimeUser, ShortRealtimeUser } from '@hedgedoc/commons'
 import type { Action } from 'redux'
 
 export enum RealtimeStatusActionType {
@@ -16,10 +16,7 @@ export enum RealtimeStatusActionType {
 export interface SetRealtimeUsersAction extends Action<RealtimeStatusActionType> {
   type: RealtimeStatusActionType.SET_REALTIME_USERS
   users: RealtimeUser[]
-  ownUser: {
-    styleIndex: number
-    displayName: string
-  }
+  ownUser: ShortRealtimeUser
 }
 
 export interface SetRealtimeConnectionStatusAction extends Action<RealtimeStatusActionType> {
@@ -40,10 +37,7 @@ export interface RealtimeStatus {
   onlineUsers: RealtimeUser[]
   isConnected: boolean
   isSynced: boolean
-  ownUser: {
-    displayName: string
-    styleIndex: number
-  }
+  ownUser: ShortRealtimeUser
 }
 
 export type RealtimeStatusActions =

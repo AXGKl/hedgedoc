@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022 The HedgeDoc developers (see AUTHORS file)
+ * SPDX-FileCopyrightText: 2023 The HedgeDoc developers (see AUTHORS file)
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -21,6 +21,7 @@ export const useCodeMirrorYjsExtension = (doc: RealtimeDoc, syncAdapter: YDocSyn
   const [editorReady, setEditorReady] = useState(false)
   const synchronized = useApplicationState((state) => state.realtimeStatus.isSynced)
   const connected = useApplicationState((state) => state.realtimeStatus.isConnected)
+  const ownUser = useApplicationState((state) => state.realtimeStatus.ownUser)
 
   useEffect(() => {
     if (editorReady && connected && !synchronized) {
@@ -31,9 +32,16 @@ export const useCodeMirrorYjsExtension = (doc: RealtimeDoc, syncAdapter: YDocSyn
   return useMemo(
     () => [
       ViewPlugin.define(
-        (view) => new YTextSyncViewPlugin(view, doc.getMarkdownContentChannel(), () => setEditorReady(true))
+        (view) =>
+          new YTextSyncViewPlugin(
+            view,
+            doc.getMarkdownContentChannel(),
+            doc.getRelativePositionAuthorshipsChannel(),
+            ownUser,
+            () => setEditorReady(true)
+          )
       )
     ],
-    [doc]
+    [doc, ownUser]
   )
 }
