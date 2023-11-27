@@ -16,15 +16,15 @@
 }
 
 body.night .toolbar {
-  background-color: #1c1c1e;
+  background-color: #1c2029;
   border: 1px solid #353538;
 }
 
 body.night .toolbar > .btn-toolbar > .btn-group > .btn {
-  background-color: #1c1c1e;
+  background-color: #1c2029;
   padding: 5px;
   font-size: 1em;
-  color: #5EB7E0;
+  color: #4d5569;
 }
 
 body.night .toolbar > .btn-toolbar > .btn-group > .btn:hover {
