@@ -17,7 +17,7 @@ body {
 }
 
 body.night{
-    background: #333 !important;
+    background: #1c2029 !important;
 }
 
 body.night .no-night {
@@ -147,7 +147,7 @@ body:not(.night) .night {
 }
 
 .night .ui-content{
-    background-color: #333;
+    background-color: #1c2029;
 }
 
 .ui-edit-area {
@@ -199,7 +199,7 @@ body:not(.night) .night {
 }
 
 .night .ui-view-area{
-    background: #333;
+    background: #1c2029;
     color: #ededed;
 }
 
@@ -327,7 +327,7 @@ body:not(.night) .night {
 .night .panel,
 .night .panel-heading {
   color: #eee;
-  background-color: #333;
+  background-color: #1c2029;
 }
 
 .dropdown-menu.CodeMirror-other-cursor {
@@ -380,7 +380,7 @@ div[contenteditable]:empty:not(:focus):before{
 
 .night .navbar .btn-default,
 .night .close {
-    background-color: #333;
+    background-color: #1c2029;
     border-color: #565656;
     color: #eee;
 }
@@ -414,7 +414,7 @@ div[contenteditable]:empty:not(:focus):before{
 .night .btn:hover,
 .night .close {
     color: #fff;
-    background-color: #333;
+    background-color: #1c2029;
 }
 
 .info-label {
