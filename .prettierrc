@@ -1,0 +1,15 @@
+{
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": [
+        "**/*.js"
+      ],
+      "options": {
+        "singleQuote": true,
+        "printWidth": 92,
+        "semi": false
+      }
+    }
+  ]
+}
