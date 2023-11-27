@@ -295,27 +295,44 @@
    * @param  {XMLHttpRequest} xhr
    * @return {Void}
    */
-  inlineAttachment.prototype.onFileUploadResponse = function(xhr, id) {
+  inlineAttachment.prototype.onFileUploadResponse = function (xhr, id) {
     if (this.settings.onFileUploadResponse.call(this, xhr) !== false) {
       var result = JSON.parse(xhr.responseText),
-        filename = result[this.settings.jsonFieldName];
+        filename = result[this.settings.jsonFieldName]
 
       if (result && filename) {
-          var replacements = [];
-          var string = this.settings.progressText.replace(this.filenameTag, id);
-          var lines = this.editor.getValue().split('\n');
-        var newValue = this.settings.urlText.replace(this.filenameTag, filename);
-          for(var i = 0; i < lines.length; i++) {
-            var ch = lines[i].indexOf(string);
-            if(ch != -1)
-                replacements.push({replacement:newValue, from:{line:i, ch:ch}, to:{line:i, ch:ch + string.length}});
+        var replacements = []
+        var string = this.settings.progressText.replace(this.filenameTag, id)
+        var lines = this.editor.getValue().split('\n')
+        var t = this.settings.urlText
+        var f = filename.toLowerCase()
+        var filetitle = filename.split('/')
+        filetitle = filetitle[filetitle.length - 1]
+        if (
+          f.endsWith('.png') ||
+          f.endsWith('.jpg') ||
+          f.endsWith('.gif') ||
+          f.endsWith('.svg') ||
+          f.endsWith('.bmp') ||
+          f.endsWith('.jpeg')
+        ) {
+          t = '!' + t
+          filetitle = ''
         }
-          for(var i = 0; i < replacements.length; i++)
-            this.editor.replaceRange(replacements[i]);
+        var newValue = t.replace(this.filetitleTag, filetitle).replace(this.filenameTag, filename)
+        for (var i = 0; i < lines.length; i++) {
+          var ch = lines[i].indexOf(string)
+          if (ch != -1)
+            replacements.push({
+              replacement: newValue,
+              from: { line: i, ch: ch },
+              to: { line: i, ch: ch + string.length },
+            })
+        }
+        for (var i = 0; i < replacements.length; i++) this.editor.replaceRange(replacements[i])
       }
     }
-  };
-
+  }
 
   /**
    * Called when a file has failed to upload
