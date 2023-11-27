@@ -26,19 +26,9 @@ import _ from 'lodash'
 
 import List from 'list.js'
 
-import {
-  checkLoginStateChanged,
-  setloginStateChangeEvent
-} from './lib/common/login'
+import { checkLoginStateChanged, setloginStateChangeEvent } from './lib/common/login'
 
-import {
-  debug,
-  DROPBOX_APP_KEY,
-  noteid,
-  noteurl,
-  urlpath,
-  version
-} from './lib/config'
+import { debug, DROPBOX_APP_KEY, noteid, noteurl, urlpath, version } from './lib/config'
 
 import {
   autoLinkify,
@@ -561,7 +551,7 @@ ui.area.codemirror.on('touchstart', function () {
 
 let haveUnreadChanges = false
 
-function setHaveUnreadChanges (bool) {
+function setHaveUnreadChanges(bool) {
   if (!window.loaded) return
   if (bool && (idle.isAway || Visibility.hidden())) {
     haveUnreadChanges = true
@@ -570,7 +560,7 @@ function setHaveUnreadChanges (bool) {
   }
 }
 
-function updateTitleReminder () {
+function updateTitleReminder() {
   if (!window.loaded) return
   if (haveUnreadChanges) {
     document.title = '• ' + renderTitle(ui.area.markdown)
@@ -579,7 +569,7 @@ function updateTitleReminder () {
   }
 }
 
-function setRefreshModal (status) {
+function setRefreshModal(status) {
   $('#refreshModal').modal('show')
   $('#refreshModal').find('.modal-body > div').hide()
   $('#refreshModal')
@@ -587,7 +577,7 @@ function setRefreshModal (status) {
     .show()
 }
 
-function setNeedRefresh () {
+function setNeedRefresh() {
   needRefresh = true
   editor.setOption('readOnly', true)
   socket.disconnect()
@@ -711,14 +701,9 @@ $(window).on('error', function () {
   // setNeedRefresh();
 })
 
-setupSyncAreas(
-  ui.area.codemirrorScroll,
-  ui.area.view,
-  ui.area.markdown,
-  editor
-)
+setupSyncAreas(ui.area.codemirrorScroll, ui.area.view, ui.area.markdown, editor)
 
-function autoSyncscroll () {
+function autoSyncscroll() {
   if (editorHasFocus()) {
     syncScrollToView()
   } else {
@@ -729,7 +714,7 @@ function autoSyncscroll () {
 const windowResizeDebounce = 200
 const windowResize = _.debounce(windowResizeInner, windowResizeDebounce)
 
-function windowResizeInner (callback) {
+function windowResizeInner(callback) {
   checkLayout()
   checkResponsive()
   checkEditorStyle()
@@ -768,17 +753,17 @@ function windowResizeInner (callback) {
   }
 }
 
-function checkLayout () {
+function checkLayout() {
   const navbarHieght = $('.navbar').outerHeight()
   $('body').css('padding-top', navbarHieght + 'px')
 }
 
-function editorHasFocus () {
+function editorHasFocus() {
   return $(editor.getInputField()).is(':focus')
 }
 
 // 768-792px have a gap
-function checkResponsive () {
+function checkResponsive() {
   visibleXS = $('.visible-xs').is(':visible')
   visibleSM = $('.visible-sm').is(':visible')
   visibleMD = $('.visible-md').is(':visible')
@@ -798,7 +783,7 @@ function checkResponsive () {
 let lastEditorWidth = 0
 let previousFocusOnEditor = null
 
-function checkEditorStyle () {
+function checkEditorStyle() {
   let desireHeight = editorInstance.statusBar
     ? ui.area.edit.height() - editorInstance.statusBar.outerHeight()
     : ui.area.edit.height()
@@ -886,7 +871,7 @@ function checkEditorStyle () {
   }
 }
 
-function checkSyncToggle () {
+function checkSyncToggle() {
   if (appState.syncscroll) {
     if (previousFocusOnEditor) {
       window.preventSyncScrollToView = false
@@ -895,15 +880,9 @@ function checkSyncToggle () {
       window.preventSyncScrollToEdit = false
       syncScrollToEdit()
     }
-    ui.area.resize.syncToggle
-      .find('i')
-      .removeClass('fa-unlink')
-      .addClass('fa-link')
+    ui.area.resize.syncToggle.find('i').removeClass('fa-unlink').addClass('fa-link')
   } else {
-    ui.area.resize.syncToggle
-      .find('i')
-      .removeClass('fa-link')
-      .addClass('fa-unlink')
+    ui.area.resize.syncToggle.find('i').removeClass('fa-link').addClass('fa-unlink')
   }
 }
 
@@ -911,7 +890,7 @@ const checkEditorScrollbar = _.debounce(function () {
   editor.operation(checkEditorScrollbarInner)
 }, 50)
 
-function checkEditorScrollbarInner () {
+function checkEditorScrollbarInner() {
   // workaround simple scroll bar knob
   // will get wrong position when editor height changed
   const scrollInfo = editor.getScrollInfo()
@@ -919,29 +898,23 @@ function checkEditorScrollbarInner () {
   editor.scrollTo(null, scrollInfo.top)
 }
 
-function checkTocStyle () {
+function checkTocStyle() {
   // toc right
   const paddingRight = parseFloat(ui.area.markdown.css('padding-right'))
   const right =
     $(window).width() -
-    (ui.area.markdown.offset().left +
-      ui.area.markdown.outerWidth() -
-      paddingRight)
+    (ui.area.markdown.offset().left + ui.area.markdown.outerWidth() - paddingRight)
   ui.toc.toc.css('right', right + 'px')
   // affix toc left
   let newbool
   const rightMargin =
-    (ui.area.markdown.parent().outerWidth() - ui.area.markdown.outerWidth()) /
-    2
+    (ui.area.markdown.parent().outerWidth() - ui.area.markdown.outerWidth()) / 2
   // for ipad or wider device
   if (rightMargin >= 133) {
     newbool = true
-    const affixLeftMargin =
-      (ui.toc.affix.outerWidth() - ui.toc.affix.width()) / 2
+    const affixLeftMargin = (ui.toc.affix.outerWidth() - ui.toc.affix.width()) / 2
     const left =
-      ui.area.markdown.offset().left +
-      ui.area.markdown.outerWidth() -
-      affixLeftMargin
+      ui.area.markdown.offset().left + ui.area.markdown.outerWidth() - affixLeftMargin
     ui.toc.affix.css('left', left + 'px')
     ui.toc.affix.css('width', rightMargin + 'px')
   } else {
@@ -966,7 +939,7 @@ function checkTocStyle () {
   }
 }
 
-function showStatus (type, num) {
+function showStatus(type, num) {
   currentStatus = type
   const shortStatus = ui.toolbar.shortStatus
   const status = ui.toolbar.status
@@ -1007,7 +980,7 @@ function showStatus (type, num) {
   status.append(label)
 }
 
-function toggleMode () {
+function toggleMode() {
   switch (appState.currentMode) {
     case modeType.edit:
       changeMode(modeType.view)
@@ -1023,7 +996,7 @@ function toggleMode () {
 
 let lastMode = null
 
-function changeMode (type) {
+function changeMode(type) {
   // lock navbar to prevent it hide after changeMode
   lockNavbar()
   saveInfo()
@@ -1068,10 +1041,7 @@ function changeMode (type) {
   if (appState.currentMode === modeType.view) {
     editor.getInputField().blur()
   }
-  if (
-    appState.currentMode === modeType.edit ||
-    appState.currentMode === modeType.both
-  ) {
+  if (appState.currentMode === modeType.edit || appState.currentMode === modeType.both) {
     // add and update status bar
     if (!editorInstance.statusBar) {
       editorInstance.addStatusBar()
@@ -1089,10 +1059,7 @@ function changeMode (type) {
     $(document.body).css('background-color', 'white')
     updateView()
   } else {
-    $(document.body).css(
-      'background-color',
-      ui.area.codemirror.css('background-color')
-    )
+    $(document.body).css('background-color', ui.area.codemirror.css('background-color'))
   }
   // check resizable editor style
   if (appState.currentMode === modeType.both) {
@@ -1154,7 +1121,7 @@ function changeMode (type) {
   unlockNavbar()
 }
 
-function lockNavbar () {
+function lockNavbar() {
   $('.navbar').addClass('locked')
 }
 
@@ -1162,7 +1129,7 @@ const unlockNavbar = _.debounce(function () {
   $('.navbar').removeClass('locked')
 }, 200)
 
-function showMessageModal (title, header, href, text, success) {
+function showMessageModal(title, header, href, text, success) {
   const modal = $('.message-modal')
   modal.find('.modal-title').html(title)
   modal.find('.modal-body h5').html(header)
@@ -1171,9 +1138,7 @@ function showMessageModal (title, header, href, text, success) {
   } else {
     modal.find('.modal-body a').removeAttr('href').text(text)
   }
-  modal
-    .find('.modal-footer button')
-    .removeClass('btn-default btn-success btn-danger')
+  modal.find('.modal-footer button').removeClass('btn-default btn-success btn-danger')
   if (success) {
     modal.find('.modal-footer button').addClass('btn-success')
   } else {
@@ -1416,7 +1381,7 @@ ui.modal.revision.on('show.bs.modal', function (e) {
       // na
     })
 })
-function checkRevisionViewer () {
+function checkRevisionViewer() {
   if (revisionViewer) {
     const container = $(revisionViewer.display.wrapper).parent()
     $(revisionViewer.display.scroller).css('height', container.height() + 'px')
@@ -1425,7 +1390,7 @@ function checkRevisionViewer () {
 }
 ui.modal.revision.on('shown.bs.modal', checkRevisionViewer)
 $(window).resize(checkRevisionViewer)
-function parseRevisions (_revisions) {
+function parseRevisions(_revisions) {
   if (_revisions.length !== revisions) {
     revisions = _revisions
     let lastRevision = null
@@ -1443,9 +1408,7 @@ function parseRevisions (_revisions) {
         '<i class="fa fa-clock-o"></i> ' + moment(revision.time).format('llll')
       )
       const itemText = $('<p class="list-group-item-text"></p>')
-      itemText.html(
-        '<i class="fa fa-file-text"></i> Length: ' + revision.length
-      )
+      itemText.html('<i class="fa fa-file-text"></i> Length: ' + revision.length)
       item.append(itemHeading).append(itemText)
       item.click(function (e) {
         const time = $(this).attr('data-revision-time')
@@ -1458,7 +1421,7 @@ function parseRevisions (_revisions) {
     }
   }
 }
-function selectRevision (time) {
+function selectRevision(time) {
   if (time === revisionTime) return
   $.get(noteurl + '/revision/' + time)
     .done(function (data) {
@@ -1466,9 +1429,7 @@ function selectRevision (time) {
       revisionTime = time
       const lastScrollInfo = revisionViewer.getScrollInfo()
       revisionList.children().removeClass('active')
-      revisionList
-        .find('[data-revision-time="' + time + '"]')
-        .addClass('active')
+      revisionList.find('[data-revision-time="' + time + '"]').addClass('active')
       const content = revision.content
       revisionViewer.setValue(content)
       revisionViewer.scrollTo(null, lastScrollInfo.top)
@@ -1483,7 +1444,9 @@ function selectRevision (time) {
           for (let i = 0; i < patch.diffs.length; i++) {
             const diff = patch.diffs[i]
             // ignore if diff only contains line breaks
-            if ((diff[1].match(/\n/g) || []).length === diff[1].length) { continue }
+            if ((diff[1].match(/\n/g) || []).length === diff[1].length) {
+              continue
+            }
             let prePos, postPos
             switch (diff[0]) {
               case 0: // retain
@@ -1491,32 +1454,26 @@ function selectRevision (time) {
                 break
               case 1: // insert
                 prePos = revisionViewer.posFromIndex(currIndex)
-                postPos = revisionViewer.posFromIndex(
-                  currIndex + diff[1].length
-                )
+                postPos = revisionViewer.posFromIndex(currIndex + diff[1].length)
                 revisionInsert.push({
                   from: prePos,
                   to: postPos
                 })
                 revisionViewer.markText(prePos, postPos, {
-                  css:
-                    'background-color: rgba(230,255,230,0.7); text-decoration: underline;'
+                  css: 'background-color: rgba(230,255,230,0.7); text-decoration: underline;'
                 })
                 currIndex += diff[1].length
                 break
               case -1: // delete
                 prePos = revisionViewer.posFromIndex(currIndex)
                 revisionViewer.replaceRange(diff[1], prePos)
-                postPos = revisionViewer.posFromIndex(
-                  currIndex + diff[1].length
-                )
+                postPos = revisionViewer.posFromIndex(currIndex + diff[1].length)
                 revisionDelete.push({
                   from: prePos,
                   to: postPos
                 })
                 revisionViewer.markText(prePos, postPos, {
-                  css:
-                    'background-color: rgba(255,230,230,0.7); text-decoration: line-through;'
+                  css: 'background-color: rgba(255,230,230,0.7); text-decoration: line-through;'
                 })
                 bias += diff[1].length
                 currIndex += diff[1].length
@@ -1538,7 +1495,7 @@ function selectRevision (time) {
       // na
     })
 }
-function initRevisionViewer () {
+function initRevisionViewer() {
   if (revisionViewer) return
   const revisionViewerTextArea = document.getElementById('revisionViewer')
   revisionViewer = CodeMirror.fromTextArea(revisionViewerTextArea, {
@@ -1565,8 +1522,7 @@ function initRevisionViewer () {
 }
 $('#revisionModalDownload').click(function () {
   if (!revision) return
-  const filename =
-    renderFilename(ui.area.markdown) + '_' + revisionTime + '.md'
+  const filename = renderFilename(ui.area.markdown) + '_' + revisionTime + '.md'
   const blob = new Blob([revision.content], {
     type: 'text/markdown;charset=utf-8'
   })
@@ -1629,7 +1585,7 @@ ui.modal.snippetImportSnippets.change(function () {
   )
 })
 
-function scrollToTop () {
+function scrollToTop() {
   if (appState.currentMode === modeType.both) {
     if (editor.getScrollInfo().top !== 0) {
       editor.scrollTo(0, 0)
@@ -1653,7 +1609,7 @@ function scrollToTop () {
   }
 }
 
-function scrollToBottom () {
+function scrollToBottom() {
   if (appState.currentMode === modeType.both) {
     const scrollInfo = editor.getScrollInfo()
     const scrollHeight = scrollInfo.height
@@ -1687,7 +1643,7 @@ window.scrollToBottom = scrollToBottom
 let enoughForAffixToc = true
 
 // scrollspy
-function generateScrollspy () {
+function generateScrollspy() {
   $(document.body).scrollspy({
     target: '.scrollspy-body'
   })
@@ -1707,21 +1663,13 @@ function generateScrollspy () {
   // ui.area.view.scroll();
 }
 
-function updateScrollspy () {
+function updateScrollspy() {
   const headers = ui.area.markdown.find('h1, h2, h3').toArray()
   const headerMap = []
   for (let i = 0; i < headers.length; i++) {
-    headerMap.push(
-      $(headers[i]).offset().top - parseInt($(headers[i]).css('margin-top'))
-    )
+    headerMap.push($(headers[i]).offset().top - parseInt($(headers[i]).css('margin-top')))
   }
-  applyScrollspyActive(
-    $(window).scrollTop(),
-    headerMap,
-    headers,
-    $('.scrollspy-body'),
-    0
-  )
+  applyScrollspyActive($(window).scrollTop(), headerMap, headers, $('.scrollspy-body'), 0)
   const offset = ui.area.view.scrollTop() - ui.area.view.offset().top
   applyScrollspyActive(
     ui.area.view.scrollTop(),
@@ -1732,7 +1680,7 @@ function updateScrollspy () {
   )
 }
 
-function applyScrollspyActive (top, headerMap, headers, target, offset) {
+function applyScrollspyActive(top, headerMap, headers, target, offset) {
   let index = 0
   for (let i = headerMap.length - 1; i >= 0; i--) {
     if (
@@ -1867,8 +1815,7 @@ $('#snippetImportModalConfirm').click(function () {
     )
   } else {
     ui.spinner.show()
-    const accessToken =
-      '?access_token=' + $('#snippetImportModalAccessToken').val()
+    const accessToken = '?access_token=' + $('#snippetImportModalAccessToken').val()
     const fullURL =
       $('#snippetImportModalBaseURL').val() +
       '/api/' +
@@ -1942,12 +1889,9 @@ $('#snippetExportModalConfirm').click(function () {
           : 'private'
   }
 
-  if (
-    !data.title ||
-    !data.files[0].file_path ||
-    !data.files[0].content ||
-    !projectId
-  ) { return }
+  if (!data.title || !data.files[0].file_path || !data.files[0].content || !projectId) {
+    return
+  }
   $('#snippetExportModalLoading').show()
   const fullURL = `${baseURL}/api/${version}/projects/${projectId}/snippets?access_token=${accesstoken}`
   $.ajax(fullURL, {
@@ -1968,7 +1912,7 @@ $('#snippetExportModalConfirm').click(function () {
   })
 })
 
-function parseToEditor (data) {
+function parseToEditor(data) {
   const turndownService = new TurndownService({
     defaultReplacement: function (innerHTML, node) {
       return node.isBlock ? '\n\n' + node.outerHTML + '\n\n' : node.outerHTML
@@ -1980,7 +1924,7 @@ function parseToEditor (data) {
   }
 }
 
-function replaceAll (data) {
+function replaceAll(data) {
   editor.replaceRange(
     data,
     {
@@ -1995,7 +1939,7 @@ function replaceAll (data) {
   )
 }
 
-function importFromUrl (url) {
+function importFromUrl(url) {
   // console.debug(url);
   if (!url) return
   if (!isValidURL(url)) {
@@ -2087,7 +2031,7 @@ $('.ui-delete-modal-confirm').click(function () {
   socket.emit('delete')
 })
 
-function toggleNightMode () {
+function toggleNightMode() {
   const $body = $('body')
   const isActive = store.get('nightMode') === true
   $body.toggleClass('night', !isActive)
@@ -2095,13 +2039,13 @@ function toggleNightMode () {
   store.set('nightMode', !isActive)
 }
 
-function emitPermission (_permission) {
+function emitPermission(_permission) {
   if (_permission !== permission) {
     socket.emit('permission', _permission)
   }
 }
 
-function updatePermission (newPermission) {
+function updatePermission(newPermission) {
   if (permission !== newPermission) {
     permission = newPermission
     if (window.loaded) refreshView()
@@ -2134,11 +2078,7 @@ function updatePermission (newPermission) {
       title = 'Only owner can view & edit'
       break
   }
-  if (
-    personalInfo.userid &&
-    window.owner &&
-    personalInfo.userid === window.owner
-  ) {
+  if (personalInfo.userid && window.owner && personalInfo.userid === window.owner) {
     label += ' <i class="fa fa-caret-down"></i>'
     ui.infobar.permission.label.removeClass('disabled')
   } else {
@@ -2147,7 +2087,7 @@ function updatePermission (newPermission) {
   ui.infobar.permission.label.html(label).attr('title', title)
 }
 
-function havePermission () {
+function havePermission() {
   let bool = false
   switch (permission) {
     case 'freely':
@@ -2278,7 +2218,7 @@ let authors = []
 let authorship = []
 let authorMarks = {} // temp variable
 let addTextMarkers = [] // temp variable
-function updateInfo (data) {
+function updateInfo(data) {
   // console.debug(data);
   if (
     Object.prototype.hasOwnProperty.call(data, 'createtime') &&
@@ -2294,10 +2234,7 @@ function updateInfo (data) {
     window.lastchangetime = data.updatetime
     updateLastChange()
   }
-  if (
-    Object.prototype.hasOwnProperty.call(data, 'owner') &&
-    window.owner !== data.owner
-  ) {
+  if (Object.prototype.hasOwnProperty.call(data, 'owner') && window.owner !== data.owner) {
     window.owner = data.owner
     window.ownerprofile = data.ownerprofile
     updateOwner()
@@ -2311,10 +2248,7 @@ function updateInfo (data) {
     updateLastChangeUser()
     updateOwner()
   }
-  if (
-    Object.prototype.hasOwnProperty.call(data, 'authors') &&
-    authors !== data.authors
-  ) {
+  if (Object.prototype.hasOwnProperty.call(data, 'authors') && authors !== data.authors) {
     authors = data.authors
   }
   if (
@@ -2328,7 +2262,7 @@ function updateInfo (data) {
 const updateAuthorship = _.debounce(function () {
   editor.operation(updateAuthorshipInner)
 }, 50)
-function initMark () {
+function initMark() {
   return {
     gutter: {
       userid: null,
@@ -2337,7 +2271,7 @@ function initMark () {
     textmarkers: []
   }
 }
-function initMarkAndCheckGutter (mark, author, timestamp) {
+function initMarkAndCheckGutter(mark, author, timestamp) {
   if (!mark) mark = initMark()
   if (!mark.gutter.userid || mark.gutter.timestamp > timestamp) {
     mark.gutter.userid = author.userid
@@ -2348,9 +2282,7 @@ function initMarkAndCheckGutter (mark, author, timestamp) {
 const addStyleRule = (function () {
   const added = {}
   const styleElement = document.createElement('style')
-  document.documentElement
-    .getElementsByTagName('head')[0]
-    .appendChild(styleElement)
+  document.documentElement.getElementsByTagName('head')[0].appendChild(styleElement)
   const styleSheet = styleElement.sheet
 
   return function (css) {
@@ -2358,13 +2290,10 @@ const addStyleRule = (function () {
       return
     }
     added[css] = true
-    styleSheet.insertRule(
-      css,
-      (styleSheet.cssRules || styleSheet.rules).length
-    )
+    styleSheet.insertRule(css, (styleSheet.cssRules || styleSheet.rules).length)
   }
 })()
-function updateAuthorshipInner () {
+function updateAuthorshipInner() {
   // ignore when ot not synced yet
   if (havePendingOperation()) return
   authorMarks = {}
@@ -2379,11 +2308,7 @@ function updateAuthorshipInner () {
       if (prePos.ch === 0 && postPos.ch === postLine.length) {
         for (let j = prePos.line; j <= postPos.line; j++) {
           if (editor.getLine(j)) {
-            authorMarks[j] = initMarkAndCheckGutter(
-              authorMarks[j],
-              author,
-              atom[3]
-            )
+            authorMarks[j] = initMarkAndCheckGutter(authorMarks[j], author, atom[3])
           }
         }
       } else if (postPos.line - prePos.line >= 1) {
@@ -2392,11 +2317,7 @@ function updateAuthorshipInner () {
         if (prePos.ch === preLine.length) {
           startLine++
         } else if (prePos.ch !== 0) {
-          const mark = initMarkAndCheckGutter(
-            authorMarks[prePos.line],
-            author,
-            atom[3]
-          )
+          const mark = initMarkAndCheckGutter(authorMarks[prePos.line], author, atom[3])
           const _postPos = {
             line: prePos.line,
             ch: preLine.length
@@ -2413,11 +2334,7 @@ function updateAuthorshipInner () {
         if (postPos.ch === 0) {
           endLine--
         } else if (postPos.ch !== postLine.length) {
-          const mark = initMarkAndCheckGutter(
-            authorMarks[postPos.line],
-            author,
-            atom[3]
-          )
+          const mark = initMarkAndCheckGutter(authorMarks[postPos.line], author, atom[3])
           const _prePos = {
             line: postPos.line,
             ch: 0
@@ -2433,19 +2350,11 @@ function updateAuthorshipInner () {
         }
         for (let j = startLine; j <= endLine; j++) {
           if (editor.getLine(j)) {
-            authorMarks[j] = initMarkAndCheckGutter(
-              authorMarks[j],
-              author,
-              atom[3]
-            )
+            authorMarks[j] = initMarkAndCheckGutter(authorMarks[j], author, atom[3])
           }
         }
       } else {
-        const mark = initMarkAndCheckGutter(
-          authorMarks[prePos.line],
-          author,
-          atom[3]
-        )
+        const mark = initMarkAndCheckGutter(authorMarks[prePos.line], author, atom[3])
         if (JSON.stringify(prePos) !== JSON.stringify(postPos)) {
           mark.textmarkers.push({
             userid: author.userid,
@@ -2505,7 +2414,7 @@ function updateAuthorshipInner () {
     })
   }
 }
-function iterateLine (line) {
+function iterateLine(line) {
   const lineNumber = line.lineNo()
   const currMark = authorMarks[lineNumber]
   const author = currMark ? authors[currMark.gutter.userid] : null
@@ -2553,7 +2462,9 @@ editorInstance.on('update', function () {
   // clear tooltip which described element has been removed
   $('[id^="tooltip"]').each(function (index, element) {
     const $ele = $(element)
-    if ($('[aria-describedby="' + $ele.attr('id') + '"]').length <= 0) { $ele.remove() }
+    if ($('[aria-describedby="' + $ele.attr('id') + '"]').length <= 0) {
+      $ele.remove()
+    }
   })
 })
 socket.on('check', function (data) {
@@ -2614,7 +2525,7 @@ const CodeMirrorAdapter = ot.CodeMirrorAdapter
 let cmClient = null
 let synchronized_ = null
 
-function havePendingOperation () {
+function havePendingOperation() {
   return !!(
     cmClient &&
     cmClient.state &&
@@ -2799,7 +2710,7 @@ const options = {
 const onlineUserList = new List('online-user-list', options)
 const shortOnlineUserList = new List('short-online-user-list', options)
 
-function updateOnlineStatus () {
+function updateOnlineStatus() {
   if (!window.loaded || !socket.connected) return
   const _onlineUsers = deduplicateOnlineUsers(onlineUsers)
   showStatus(statusType.online, _onlineUsers.length)
@@ -2846,7 +2757,7 @@ function updateOnlineStatus () {
   renderUserStatusList(shortOnlineUserList)
 }
 
-function sortOnlineUserList (list) {
+function sortOnlineUserList(list) {
   // sort order by isSelf, login state, idle state, alphabet name, color brightness
   list.sort('', {
     sortFunction: function (a, b) {
@@ -2909,7 +2820,7 @@ function sortOnlineUserList (list) {
   })
 }
 
-function renderUserStatusList (list) {
+function renderUserStatusList(list) {
   const items = list.items
   for (let j = 0; j < items.length; j++) {
     const item = items[j]
@@ -2935,7 +2846,7 @@ function renderUserStatusList (list) {
   }
 }
 
-function deduplicateOnlineUsers (list) {
+function deduplicateOnlineUsers(list) {
   const _onlineUsers = []
   for (let i = 0; i < list.length; i++) {
     const user = $.extend({}, list[i])
@@ -2968,7 +2879,7 @@ function deduplicateOnlineUsers (list) {
 
 let userStatusCache = null
 
-function emitUserStatus (force) {
+function emitUserStatus(force) {
   if (!window.loaded) return
   let type = null
   if (visibleXS) {
@@ -3001,7 +2912,7 @@ function emitUserStatus (force) {
   }
 }
 
-function checkCursorTag (coord, ele) {
+function checkCursorTag(coord, ele) {
   if (!ele) return // return if element not exists
   // set margin
   const tagRightMargin = 0
@@ -3043,7 +2954,7 @@ function checkCursorTag (coord, ele) {
   ele[0].style.top = offsetTop + 'px'
 }
 
-function buildCursor (user) {
+function buildCursor(user) {
   if (appState.currentMode === modeType.view) return
   if (!user.cursor) return
   const coord = editor.charCoords(user.cursor, 'windows')
@@ -3201,7 +3112,7 @@ function buildCursor (user) {
 }
 
 // editor actions
-function removeNullByte (cm, change) {
+function removeNullByte(cm, change) {
   const str = change.text.join('\n')
   // eslint-disable-next-line no-control-regex
   if (/\u0000/g.test(str) && change.update) {
@@ -3213,12 +3124,11 @@ function removeNullByte (cm, change) {
     )
   }
 }
-function enforceMaxLength (cm, change) {
+function enforceMaxLength(cm, change) {
   const maxLength = cm.getOption('maxLength')
   if (maxLength && change.update) {
     let str = change.text.join('\n')
-    let delta =
-      str.length - (cm.indexFromPos(change.to) - cm.indexFromPos(change.from))
+    let delta = str.length - (cm.indexFromPos(change.to) - cm.indexFromPos(change.from))
     if (delta <= 0) {
       return false
     }
@@ -3309,7 +3219,7 @@ editorInstance.on('focus', function (editor) {
 
 const cursorActivity = _.debounce(cursorActivityInner, cursorActivityDebounce)
 
-function cursorActivityInner (editor) {
+function cursorActivityInner(editor) {
   if (editorHasFocus() && !Visibility.hidden()) {
     for (let i = 0; i < onlineUsers.length; i++) {
       if (onlineUsers[i].id === personalInfo.id) {
@@ -3367,7 +3277,7 @@ editorInstance.on('blur', function (cm) {
   socket.emit('cursor blur')
 })
 
-function saveInfo () {
+function saveInfo() {
   const scrollbarStyle = editor.getOption('scrollbarStyle')
   const left = $(window).scrollLeft()
   const top = $(window).scrollTop()
@@ -3395,7 +3305,7 @@ function saveInfo () {
   lastInfo.needRestore = true
 }
 
-function restoreInfo () {
+function restoreInfo() {
   const scrollbarStyle = editor.getOption('scrollbarStyle')
   if (lastInfo.needRestore) {
     const line = lastInfo.edit.cursor.line
@@ -3431,7 +3341,7 @@ function restoreInfo () {
 }
 
 // view actions
-function refreshView () {
+function refreshView() {
   ui.area.markdown.html('')
   isDirty = true
   updateViewInner()
@@ -3444,7 +3354,7 @@ const updateView = _.debounce(function () {
 let lastResult = null
 let postUpdateEvent = null
 
-function updateViewInner () {
+function updateViewInner() {
   if (appState.currentMode === modeType.edit || !isDirty) return
   const value = editor.getValue()
   const lastMeta = md.meta
@@ -3457,10 +3367,7 @@ function updateViewInner () {
       separator: '^(\r\n?|\n)---(\r\n?|\n)$',
       verticalSeparator: '^(\r\n?|\n)----(\r\n?|\n)$'
     }
-    const slides = window.RevealMarkdown.slidify(
-      editor.getValue(),
-      slideOptions
-    )
+    const slides = window.RevealMarkdown.slidify(editor.getValue(), slideOptions)
     ui.area.markdown.html(slides)
     window.RevealMarkdown.initialize()
     // prevent XSS
@@ -3478,13 +3385,7 @@ function updateViewInner () {
     }
     // only render again when meta changed
     if (JSON.stringify(md.meta) !== JSON.stringify(lastMeta)) {
-      parseMeta(
-        md,
-        ui.area.codemirror,
-        ui.area.markdown,
-        $('#ui-toc'),
-        $('#ui-toc-affix')
-      )
+      parseMeta(md, ui.area.codemirror, ui.area.markdown, $('#ui-toc'), $('#ui-toc-affix'))
       rendered = md.render(value)
     }
     // prevent XSS
@@ -3520,11 +3421,11 @@ const updateHistoryDebounce = 600
 
 const updateHistory = _.debounce(updateHistoryInner, updateHistoryDebounce)
 
-function updateHistoryInner () {
+function updateHistoryInner() {
   writeHistory(renderFilename(ui.area.markdown), renderTags(ui.area.markdown))
 }
 
-function updateDataAttrs (src, des) {
+function updateDataAttrs(src, des) {
   // sync data attr startline and endline
   for (let i = 0; i < src.length; i++) {
     copyAttribute(src[i], des[i], 'data-startline')
@@ -3532,15 +3433,8 @@ function updateDataAttrs (src, des) {
   }
 }
 
-function partialUpdate (src, tar, des) {
-  if (
-    !src ||
-    src.length === 0 ||
-    !tar ||
-    tar.length === 0 ||
-    !des ||
-    des.length === 0
-  ) {
+function partialUpdate(src, tar, des) {
+  if (!src || src.length === 0 || !tar || tar.length === 0 || !des || des.length === 0) {
     ui.area.markdown.html(src)
     return
   }
@@ -3615,11 +3509,7 @@ function partialUpdate (src, tar, des) {
     for (let i = start; i >= 0; i--) {
       const rawTarStart = cloneAndRemoveDataAttr(tar[i - 1])
       const rawTarEnd = cloneAndRemoveDataAttr(tar[tarEnd + 1 + start - i])
-      if (
-        rawTarStart &&
-        rawTarEnd &&
-        rawTarStart.outerHTML === rawTarEnd.outerHTML
-      ) {
+      if (rawTarStart && rawTarEnd && rawTarStart.outerHTML === rawTarEnd.outerHTML) {
         overlap++
       } else {
         break
@@ -3689,7 +3579,7 @@ function partialUpdate (src, tar, des) {
   }
 }
 
-function cloneAndRemoveDataAttr (el) {
+function cloneAndRemoveDataAttr(el) {
   if (!el) return
   const rawEl = $(el).clone()
   rawEl.removeAttr('data-startline data-endline')
@@ -3697,7 +3587,7 @@ function cloneAndRemoveDataAttr (el) {
   return rawEl[0]
 }
 
-function copyAttribute (src, des, attr) {
+function copyAttribute(src, des, attr) {
   if (src && src.getAttribute(attr) && des) {
     des.setAttribute(attr, src.getAttribute(attr))
   }
@@ -3707,7 +3597,7 @@ if ($('.cursor-menu').length <= 0) {
   $("<div class='cursor-menu'>").insertAfter('.CodeMirror-cursors')
 }
 
-function reverseSortCursorMenu (dropdown) {
+function reverseSortCursorMenu(dropdown) {
   const items = dropdown.find('.textcomplete-item')
   items.sort(function (a, b) {
     return $(b).attr('data-index') - $(a).attr('data-index')
@@ -3717,7 +3607,7 @@ function reverseSortCursorMenu (dropdown) {
 
 const checkCursorMenu = _.throttle(checkCursorMenuInner, cursorMenuThrottle)
 
-function checkCursorMenuInner () {
+function checkCursorMenuInner() {
   // get element
   const dropdown = $('.cursor-menu > .dropdown-menu')
   // return if not exists
@@ -3776,8 +3666,7 @@ function checkCursorMenuInner () {
       dropdown.html(reverseSortCursorMenu(dropdown))
       window.upSideDown = true
     }
-    const textCompleteDropdown = $(editor.getInputField()).data('textComplete')
-      .dropdown
+    const textCompleteDropdown = $(editor.getInputField()).data('textComplete').dropdown
     lastUpSideDown = textCompleteDropdown.upSideDown
     textCompleteDropdown.upSideDown = window.upSideDown
   }
@@ -3793,34 +3682,32 @@ function checkCursorMenuInner () {
   dropdown[0].style.top = top + offsetTop + 'px'
 }
 
-function checkInIndentCode () {
+function checkInIndentCode() {
   // if line starts with tab or four spaces is a code block
   const line = editor.getLine(editor.getCursor().line)
-  const isIndentCode =
-    line.substr(0, 4) === '    ' || line.substr(0, 1) === '\t'
+  const isIndentCode = line.substr(0, 4) === '    ' || line.substr(0, 1) === '\t'
   return isIndentCode
 }
 
 let isInCode = false
 
-function checkInCode () {
+function checkInCode() {
   isInCode = checkAbove(matchInCode) || checkInIndentCode()
 }
 
-function checkAbove (method) {
+function checkAbove(method) {
   const cursor = editor.getCursor()
   let text = []
   for (let i = 0; i < cursor.line; i++) {
     // contain current line
     text.push(editor.getLine(i))
   }
-  text =
-    text.join('\n') + '\n' + editor.getLine(cursor.line).slice(0, cursor.ch)
+  text = text.join('\n') + '\n' + editor.getLine(cursor.line).slice(0, cursor.ch)
   // console.debug(text);
   return method(text)
 }
 
-function checkBelow (method) {
+function checkBelow(method) {
   const cursor = editor.getCursor()
   const count = editor.lineCount()
   let text = []
@@ -3833,7 +3720,7 @@ function checkBelow (method) {
   return method(text)
 }
 
-function matchInCode (text) {
+function matchInCode(text) {
   let match
   match = text.match(/`{3,}/g)
   if (match && match.length % 2) {
@@ -3851,17 +3738,17 @@ function matchInCode (text) {
 let isInContainer = false
 let isInContainerSyntax = false
 
-function checkInContainer () {
+function checkInContainer() {
   isInContainer = checkAbove(matchInContainer) && !checkInIndentCode()
 }
 
-function checkInContainerSyntax () {
+function checkInContainerSyntax() {
   // if line starts with :::, it's in container syntax
   const line = editor.getLine(editor.getCursor().line)
   isInContainerSyntax = line.substr(0, 3) === ':::'
 }
 
-function matchInContainer (text) {
+function matchInContainer(text) {
   const match = text.match(/:{3,}/g)
   if (match && match.length % 2) {
     return true
@@ -4072,7 +3959,8 @@ $(editor.getInputField())
       },
       {
         // referral
-        match: /(^\s*|\n|\s{2})((\[\]|\[\]\[\]|\[\]\(\)|!|!\[\]|!\[\]\[\]|!\[\]\(\))\s*\w*)$/,
+        match:
+          /(^\s*|\n|\s{2})((\[\]|\[\]\[\]|\[\]\(\)|!|!\[\]|!\[\]\[\]|!\[\]\(\))\s*\w*)$/,
         search: function (term, callback) {
           callback(
             $.map(supportReferrals, function (referral) {

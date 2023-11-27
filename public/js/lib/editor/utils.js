@@ -1,6 +1,6 @@
 const wrapSymbols = ['*', '_', '~', '^', '+', '=']
 
-export function wrapTextWith (editor, cm, symbol) {
+export function wrapTextWith(editor, cm, symbol) {
   if (!cm.getSelection()) {
     return CodeMirror.Pass
   } else {
@@ -48,18 +48,18 @@ export function wrapTextWith (editor, cm, symbol) {
   }
 }
 
-export function insertText (cm, text, cursorEnd = 0) {
+export function insertText(cm, text, cursorEnd = 0) {
   const cursor = cm.getCursor()
   cm.replaceSelection(text, cursor, cursor)
   cm.focus()
   cm.setCursor({ line: cursor.line, ch: cursor.ch + cursorEnd })
 }
 
-export function insertLink (cm, isImage) {
+export function insertLink(cm, isImage) {
   const cursor = cm.getCursor()
   const ranges = cm.listSelections()
   const linkEnd = '](https://)'
-  const symbol = (isImage) ? '![' : '['
+  const symbol = isImage ? '![' : '['
 
   for (let i = 0; i < ranges.length; i++) {
     const range = ranges[i]
@@ -87,7 +87,7 @@ export function insertLink (cm, isImage) {
   cm.focus()
 }
 
-export function insertHeader (cm) {
+export function insertHeader(cm) {
   const cursor = cm.getCursor()
   const startOfLine = { line: cursor.line, ch: 0 }
   const startOfLineText = cm.getRange(startOfLine, { line: cursor.line, ch: 1 })
@@ -100,7 +100,7 @@ export function insertHeader (cm) {
   cm.focus()
 }
 
-export function insertOnStartOfLines (cm, symbol) {
+export function insertOnStartOfLines(cm, symbol) {
   const cursor = cm.getCursor()
   const ranges = cm.listSelections()
 

@@ -2,7 +2,7 @@
 /* global Cookies */
 const supportedLanguages = require('../../locales/_supported.json')
 
-function detectLang () {
+function detectLang() {
   if (Cookies.get('locale')) {
     let lang = Cookies.get('locale')
     if (lang === 'zh') {

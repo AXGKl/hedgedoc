@@ -45,7 +45,7 @@ window.lastchangeui = {
 
 const ownerui = $('.ui-owner')
 
-export function updateLastChange () {
+export function updateLastChange() {
   if (!window.lastchangeui) return
   if (window.createtime) {
     if (window.createtime && !window.lastchangetime) {
@@ -65,12 +65,14 @@ setInterval(updateLastChange, 60000)
 window.lastchangeuser = null
 window.lastchangeuserprofile = null
 
-export function updateLastChangeUser () {
+export function updateLastChangeUser() {
   if (window.lastchangeui) {
     if (window.lastchangeuser && window.lastchangeuserprofile) {
       const icon = window.lastchangeui.user.children('i')
       icon.attr('title', window.lastchangeuserprofile.name).tooltip('fixTitle')
-      if (window.lastchangeuserprofile.photo) { icon.attr('style', `background-image:url(${window.lastchangeuserprofile.photo})`) }
+      if (window.lastchangeuserprofile.photo) {
+        icon.attr('style', `background-image:url(${window.lastchangeuserprofile.photo})`)
+      }
       window.lastchangeui.user.show()
       window.lastchangeui.nouser.hide()
     } else {
@@ -83,13 +85,15 @@ export function updateLastChangeUser () {
 window.owner = null
 window.ownerprofile = null
 
-export function updateOwner () {
+export function updateOwner() {
   if (ownerui) {
     if (window.owner && window.ownerprofile && window.owner !== window.lastchangeuser) {
       const icon = ownerui.children('i')
       icon.attr('title', window.ownerprofile.name).tooltip('fixTitle')
       const styleString = `background-image:url(${window.ownerprofile.photo})`
-      if (window.ownerprofile.photo && icon.attr('style') !== styleString) { icon.attr('style', styleString) }
+      if (window.ownerprofile.photo && icon.attr('style') !== styleString) {
+        icon.attr('style', styleString)
+      }
       ownerui.show()
     } else {
       ownerui.hide()
@@ -98,9 +102,14 @@ export function updateOwner () {
 }
 
 // get title
-function getTitle (view) {
+function getTitle(view) {
   let title = ''
-  if (md && md.meta && md.meta.title && (typeof md.meta.title === 'string' || typeof md.meta.title === 'number')) {
+  if (
+    md &&
+    md.meta &&
+    md.meta.title &&
+    (typeof md.meta.title === 'string' || typeof md.meta.title === 'number')
+  ) {
     title = md.meta.title
   } else {
     const h1s = view.find('h1')
@@ -114,7 +123,7 @@ function getTitle (view) {
 }
 
 // render title
-export function renderTitle (view) {
+export function renderTitle(view) {
   let title = getTitle(view)
   if (title) {
     title += ' - HedgeDoc'
@@ -125,7 +134,7 @@ export function renderTitle (view) {
 }
 
 // render filename
-export function renderFilename (view) {
+export function renderFilename(view) {
   let filename = getTitle(view)
   if (!filename) {
     filename = 'Untitled'
@@ -134,18 +143,23 @@ export function renderFilename (view) {
 }
 
 // render tags
-export function renderTags (view) {
+export function renderTags(view) {
   const tags = []
   const rawtags = []
-  if (md && md.meta && md.meta.tags && (typeof md.meta.tags === 'string' || typeof md.meta.tags === 'number')) {
-    const metaTags = (`${md.meta.tags}`).split(',')
+  if (
+    md &&
+    md.meta &&
+    md.meta.tags &&
+    (typeof md.meta.tags === 'string' || typeof md.meta.tags === 'number')
+  ) {
+    const metaTags = `${md.meta.tags}`.split(',')
     for (let i = 0; i < metaTags.length; i++) {
       const text = metaTags[i].trim()
       if (text) rawtags.push(text)
     }
   } else {
     view.find('h6').each((key, value) => {
-      if (/^tags/gmi.test($(value).text())) {
+      if (/^tags/gim.test($(value).text())) {
         const codes = $(value).find('code')
         for (let i = 0; i < codes.length; i++) {
           const text = codes[i].innerHTML.trim()
@@ -162,12 +176,14 @@ export function renderTags (view) {
         break
       }
     }
-    if (!found) { tags.push(rawtags[i]) }
+    if (!found) {
+      tags.push(rawtags[i])
+    }
   }
   return tags
 }
 
-function slugifyWithUTF8 (text) {
+function slugifyWithUTF8(text) {
   // remove HTML tags and trim spaces
   let newText = S(text).trim().stripTags().s
   // replace space between words with dashes
@@ -177,7 +193,7 @@ function slugifyWithUTF8 (text) {
   return newText
 }
 
-export function isValidURL (str) {
+export function isValidURL(str) {
   try {
     const url = new URL(str)
     return ['http:', 'https:'].includes(url.protocol)
@@ -187,7 +203,7 @@ export function isValidURL (str) {
 }
 
 // parse meta
-export function parseMeta (md, edit, view, toc, tocAffix) {
+export function parseMeta(md, edit, view, toc, tocAffix) {
   let lang = null
   let dir = null
   let breaks = true
@@ -202,12 +218,16 @@ export function parseMeta (md, edit, view, toc, tocAffix) {
     view.attr('lang', lang)
     toc.attr('lang', lang)
     tocAffix.attr('lang', lang)
-    if (edit) { edit.attr('lang', lang) }
+    if (edit) {
+      edit.attr('lang', lang)
+    }
   } else {
     view.removeAttr('lang')
     toc.removeAttr('lang')
     tocAffix.removeAttr('lang')
-    if (edit) { edit.removeAttr('lang', lang) }
+    if (edit) {
+      edit.removeAttr('lang', lang)
+    }
   }
   // text direction
   if (dir && typeof dir === 'string') {
@@ -236,20 +256,26 @@ let coloregex = /\[color=([#|(|)|\s|,|\w]*?)\]/
 coloregex = new RegExp(coloregex.source + notinhtmltagregex.source, 'g')
 let nameregex = /\[name=(.*?)\]/
 let timeregex = /\[time=([:|,|+|-|(|)|\s|\w]*?)\]/
-const nameandtimeregex = new RegExp(nameregex.source + spaceregex.source + timeregex.source + notinhtmltagregex.source, 'g')
+const nameandtimeregex = new RegExp(
+  nameregex.source + spaceregex.source + timeregex.source + notinhtmltagregex.source,
+  'g'
+)
 nameregex = new RegExp(nameregex.source + notinhtmltagregex.source, 'g')
 timeregex = new RegExp(timeregex.source + notinhtmltagregex.source, 'g')
 
-function replaceExtraTags (html) {
+function replaceExtraTags(html) {
   html = html.replace(coloregex, '<span class="color" data-color="$1"></span>')
-  html = html.replace(nameandtimeregex, '<small><i class="fa fa-user"></i> $1 <i class="fa fa-clock-o"></i> $2</small>')
+  html = html.replace(
+    nameandtimeregex,
+    '<small><i class="fa fa-user"></i> $1 <i class="fa fa-clock-o"></i> $2</small>'
+  )
   html = html.replace(nameregex, '<small><i class="fa fa-user"></i> $1</small>')
   html = html.replace(timeregex, '<small><i class="fa fa-clock-o"></i> $1</small>')
   return html
 }
 
 // dynamic event or object binding here
-export function finishView (view) {
+export function finishView(view) {
   // todo list
   const lis = view.find('li.raw').removeClass('raw').sortByDepth().toArray()
 
@@ -263,17 +289,28 @@ export function finishView (view) {
     html = replaceExtraTags(html)
     li.innerHTML = html
     let disabled = 'disabled'
-    if (typeof editor !== 'undefined' && window.havePermission()) { disabled = '' }
+    if (typeof editor !== 'undefined' && window.havePermission()) {
+      disabled = ''
+    }
     if (/^\s*\[[xX ]]\s*/.test(html)) {
-      li.innerHTML = html.replace(/^\s*\[ ]\s*/, `<input type="checkbox" class="task-list-item-checkbox" ${disabled}><label></label>`)
-        .replace(/^\s*\[[xX]]\s*/, `<input type="checkbox" class="task-list-item-checkbox" checked ${disabled}><label></label>`)
+      li.innerHTML = html
+        .replace(
+          /^\s*\[ ]\s*/,
+          `<input type="checkbox" class="task-list-item-checkbox" ${disabled}><label></label>`
+        )
+        .replace(
+          /^\s*\[[xX]]\s*/,
+          `<input type="checkbox" class="task-list-item-checkbox" checked ${disabled}><label></label>`
+        )
       if (li.tagName.toLowerCase() !== 'li') {
         li.parentElement.setAttribute('class', 'task-list-item')
       } else {
         li.setAttribute('class', 'task-list-item')
       }
     }
-    if (typeof editor !== 'undefined' && window.havePermission()) { $(li).find('input').change(toggleTodoEvent) }
+    if (typeof editor !== 'undefined' && window.havePermission()) {
+      $(li).find('input').change(toggleTodoEvent)
+    }
     // color tag in list will convert it to tag icon with color
     const tagColor = $(li).closest('ul').find('.color')
     tagColor.each((key, value) => {
@@ -282,12 +319,16 @@ export function finishView (view) {
   }
 
   // youtube
-  view.find('div.youtube.raw').removeClass('raw')
+  view
+    .find('div.youtube.raw')
+    .removeClass('raw')
     .click(function () {
       imgPlayiframe(this, 'https://www.youtube.com/embed/')
     })
-    // vimeo
-  view.find('div.vimeo.raw').removeClass('raw')
+  // vimeo
+  view
+    .find('div.vimeo.raw')
+    .removeClass('raw')
     .click(function () {
       imgPlayiframe(this, 'https://player.vimeo.com/video/')
     })
@@ -298,16 +339,18 @@ export function finishView (view) {
         url: `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(vimeoLink)}`,
         jsonp: 'callback',
         dataType: 'jsonp',
-        success (data) {
+        success(data) {
           const image = `<img src="${data.thumbnail_url}" />`
           $(value).prepend(image)
           if (window.viewAjaxCallback) window.viewAjaxCallback()
         }
       })
     })
-    // gist
+  // gist
   view.find('code[data-gist-id]').each((key, value) => {
-    if ($(value).children().length === 0) { $(value).gist(window.viewAjaxCallback) }
+    if ($(value).children().length === 0) {
+      $(value).gist(window.viewAjaxCallback)
+    }
   })
   // sequence diagram
   const sequences = view.find('div.sequence-diagram.raw').removeClass('raw')
@@ -399,7 +442,9 @@ export function finishView (view) {
           errormessage = err.str
         }
         $value.unwrap()
-        $value.parent().append(`<div class="alert alert-warning">${escapeHTML(errormessage)}</div>`)
+        $value
+          .parent()
+          .append(`<div class="alert alert-warning">${escapeHTML(errormessage)}</div>`)
         console.warn(errormessage)
       }
     })
@@ -431,7 +476,7 @@ export function finishView (view) {
   images.each((key, value) => {
     // if it's already wrapped by link, then ignore
     const $value = $(value)
-    $value[0].onload = e => {
+    $value[0].onload = (e) => {
       if (window.viewAjaxCallback) window.viewAjaxCallback()
     }
   })
@@ -449,14 +494,18 @@ export function finishView (view) {
     $(value).closest('blockquote').css('border-left-color', $(value).attr('data-color'))
   })
   // slideshare
-  view.find('div.slideshare.raw').removeClass('raw')
+  view
+    .find('div.slideshare.raw')
+    .removeClass('raw')
     .each((key, value) => {
       $.ajax({
         type: 'GET',
-        url: `https://www.slideshare.net/api/oembed/2?url=https://www.slideshare.net/${$(value).attr('data-slideshareid')}&format=json`,
+        url: `https://www.slideshare.net/api/oembed/2?url=https://www.slideshare.net/${$(
+          value
+        ).attr('data-slideshareid')}&format=json`,
         jsonp: 'callback',
         dataType: 'jsonp',
-        success (data) {
+        success(data) {
           const $html = $(data.html)
           const iframe = $html.closest('iframe')
           const caption = $html.closest('div')
@@ -470,8 +519,10 @@ export function finishView (view) {
         }
       })
     })
-    // speakerdeck
-  view.find('div.speakerdeck.raw').removeClass('raw')
+  // speakerdeck
+  view
+    .find('div.speakerdeck.raw')
+    .removeClass('raw')
     .each((key, value) => {
       const url = `https://speakerdeck.com/${$(value).attr('data-speakerdeckid')}`
       const inner = $('<a>Speakerdeck</a>')
@@ -480,8 +531,10 @@ export function finishView (view) {
       inner.attr('target', '_blank')
       $(value).append(inner)
     })
-    // pdf
-  view.find('div.pdf.raw').removeClass('raw')
+  // pdf
+  view
+    .find('div.pdf.raw')
+    .removeClass('raw')
     .each(function (key, value) {
       const url = $(value).attr('data-pdfurl')
       const inner = $('<div></div>')
@@ -490,8 +543,10 @@ export function finishView (view) {
         height: '400px'
       })
     })
-    // syntax highlighting
-  view.find('code.raw').removeClass('raw')
+  // syntax highlighting
+  view
+    .find('code.raw')
+    .removeClass('raw')
     .each((key, value) => {
       const langDiv = $(value)
       if (langDiv.length > 0) {
@@ -508,7 +563,13 @@ export function finishView (view) {
           result = {
             value: code
           }
-        } else if (reallang === 'haskell' || reallang === 'go' || reallang === 'typescript' || reallang === 'jsx' || reallang === 'gherkin') {
+        } else if (
+          reallang === 'haskell' ||
+          reallang === 'go' ||
+          reallang === 'typescript' ||
+          reallang === 'jsx' ||
+          reallang === 'gherkin'
+        ) {
           code = S(code).unescapeHTML().s
           result = {
             value: Prism.highlight(code, Prism.languages[reallang])
@@ -542,7 +603,7 @@ export function finishView (view) {
         else langDiv.html(result.value)
       }
     })
-    // mathjax
+  // mathjax
   const mathjaxdivs = view.find('span.mathjax.raw').removeClass('raw').toArray()
   try {
     if (mathjaxdivs.length > 1) {
@@ -560,7 +621,7 @@ export function finishView (view) {
 }
 
 // only static transform should be here
-export function postProcess (code) {
+export function postProcess(code) {
   const result = $(`<div>${code}</div>`)
   // process style tags
   result.find('style').each((key, value) => {
@@ -574,7 +635,10 @@ export function postProcess (code) {
   // link should open in new window or tab
   // also add noopener to prevent clickjacking
   // See details: https://mathiasbynens.github.io/rel-noopener/
-  result.find('a:not([href^="#"]):not([target])').attr('target', '_blank').attr('rel', 'noopener')
+  result
+    .find('a:not([href^="#"]):not([target])')
+    .attr('target', '_blank')
+    .attr('rel', 'noopener')
 
   // If it's hashtag link then make it base uri independent
   result.find('a[href^="#"]').each((index, linkTag) => {
@@ -587,10 +651,19 @@ export function postProcess (code) {
   const linenumberdivs = result.find('.gutter.linenumber').toArray()
   for (let i = 0; i < linenumberdivs.length; i++) {
     if ($(linenumberdivs[i]).hasClass('continue')) {
-      const startnumber = linenumberdivs[i - 1] ? parseInt($(linenumberdivs[i - 1]).find('> span').last().attr('data-linenumber')) : 0
-      $(linenumberdivs[i]).find('> span').each((key, value) => {
-        $(value).attr('data-linenumber', startnumber + key + 1)
-      })
+      const startnumber = linenumberdivs[i - 1]
+        ? parseInt(
+            $(linenumberdivs[i - 1])
+              .find('> span')
+              .last()
+              .attr('data-linenumber')
+          )
+        : 0
+      $(linenumberdivs[i])
+        .find('> span')
+        .each((key, value) => {
+          $(value).attr('data-linenumber', startnumber + key + 1)
+        })
     }
   }
   // show yaml meta paring error
@@ -599,7 +672,9 @@ export function postProcess (code) {
     if (warning && warning.length > 0) {
       warning.text(md.metaError)
     } else {
-      warning = $(`<div id="meta-error" class="alert alert-warning">${escapeHTML(md.metaError)}</div>`)
+      warning = $(
+        `<div id="meta-error" class="alert alert-warning">${escapeHTML(md.metaError)}</div>`
+      )
       result.prepend(warning)
     }
   }
@@ -607,32 +682,38 @@ export function postProcess (code) {
 }
 window.postProcess = postProcess
 
-const domevents = Object.getOwnPropertyNames(document).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(document)))).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(window))).filter(function (i) {
-  return !i.indexOf('on') && (document[i] === null || typeof document[i] === 'function')
-}).filter(function (elem, pos, self) {
-  return self.indexOf(elem) === pos
-})
+const domevents = Object.getOwnPropertyNames(document)
+  .concat(
+    Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(document)))
+  )
+  .concat(Object.getOwnPropertyNames(Object.getPrototypeOf(window)))
+  .filter(function (i) {
+    return !i.indexOf('on') && (document[i] === null || typeof document[i] === 'function')
+  })
+  .filter(function (elem, pos, self) {
+    return self.indexOf(elem) === pos
+  })
 
-export function removeDOMEvents (view) {
+export function removeDOMEvents(view) {
   for (let i = 0, l = domevents.length; i < l; i++) {
     view.find('[' + domevents[i] + ']').removeAttr(domevents[i])
   }
 }
 window.removeDOMEvents = removeDOMEvents
 
-function toDataURL (url, callback) {
-  fetch(url).then(response => {
+function toDataURL(url, callback) {
+  fetch(url).then((response) => {
     const fr = new FileReader()
     fr.onload = function () {
       callback(this.result)
     }
-    response.blob().then(blob => {
+    response.blob().then((blob) => {
       fr.readAsDataURL(blob)
     })
   })
 }
 
-function generateCleanHTML (view) {
+function generateCleanHTML(view) {
   const src = view.clone()
   const eles = src.find('*')
   // remove syncscroll parts
@@ -646,7 +727,7 @@ function generateCleanHTML (view) {
   src.find('input.task-list-item-checkbox').attr('disabled', '')
   // replace emoji image path
   src.find('img.emoji').each((key, value) => {
-    toDataURL($(value).attr('src'), dataURL => {
+    toDataURL($(value).attr('src'), (dataURL) => {
       $(value).attr('src', dataURL)
     })
   })
@@ -661,7 +742,9 @@ function generateCleanHTML (view) {
       url = 'https://player.vimeo.com/video/'
     }
     if (url) {
-      const iframe = $('<iframe frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>')
+      const iframe = $(
+        '<iframe frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'
+      )
       iframe.attr('src', url + id)
       iframe.attr('style', style)
       $(value).html(iframe)
@@ -670,7 +753,7 @@ function generateCleanHTML (view) {
   return src
 }
 
-export function exportToRawHTML (view) {
+export function exportToRawHTML(view) {
   const filename = `${renderFilename(ui.area.markdown)}.html`
   const src = generateCleanHTML(view)
   $(src).find('a.anchor').remove()
@@ -682,24 +765,38 @@ export function exportToRawHTML (view) {
 }
 
 // extract markdown body to html and compile to template
-export function exportToHTML (view) {
+export function exportToHTML(view) {
   const title = renderTitle(ui.area.markdown)
   const filename = `${renderFilename(ui.area.markdown)}.html`
   const src = generateCleanHTML(view)
   // generate toc
   const toc = $('#ui-toc').clone()
-  toc.find('*').removeClass('active').find("a[href^='#'][smoothhashscroll]").removeAttr('smoothhashscroll')
+  toc
+    .find('*')
+    .removeClass('active')
+    .find("a[href^='#'][smoothhashscroll]")
+    .removeAttr('smoothhashscroll')
   const tocAffix = $('#ui-toc-affix').clone()
-  tocAffix.find('*').removeClass('active').find("a[href^='#'][smoothhashscroll]").removeAttr('smoothhashscroll')
+  tocAffix
+    .find('*')
+    .removeClass('active')
+    .find("a[href^='#'][smoothhashscroll]")
+    .removeAttr('smoothhashscroll')
   // generate html via template
-  $.get(`${serverurl}/build/htmlexport.html`, template => {
+  $.get(`${serverurl}/build/htmlexport.html`, (template) => {
     let html = template.replace('{{{url}}}', serverurl)
     html = html.replace('{{title}}', title)
     html = html.replace('{{{html}}}', src[0].outerHTML)
     html = html.replace('{{{ui-toc}}}', toc.html())
     html = html.replace('{{{ui-toc-affix}}}', tocAffix.html())
-    html = html.replace('{{{lang}}}', (md && md.meta && md.meta.lang) ? `lang="${md.meta.lang}"` : '')
-    html = html.replace('{{{dir}}}', (md && md.meta && md.meta.dir) ? `dir="${md.meta.dir}"` : '')
+    html = html.replace(
+      '{{{lang}}}',
+      md && md.meta && md.meta.lang ? `lang="${md.meta.lang}"` : ''
+    )
+    html = html.replace(
+      '{{{dir}}}',
+      md && md.meta && md.meta.dir ? `dir="${md.meta.dir}"` : ''
+    )
     const blob = new Blob([html], {
       type: 'text/html;charset=utf-8'
     })
@@ -725,32 +822,41 @@ $.fn.sortByDepth = function () {
   return $(result)
 }
 
-function toggleTodoEvent (e) {
+function toggleTodoEvent(e) {
   const startline = $(this).closest('li').attr('data-startline') - 1
   const line = window.editor.getLine(startline)
   const matches = line.match(/^[>\s-]*(?:[-+*]|\d+[.)])\s\[([xX ])]/)
   if (matches && matches.length >= 2) {
     let checked = null
-    if (matches[1].toLowerCase() === 'x') { checked = true } else if (matches[1] === ' ') { checked = false }
+    if (matches[1].toLowerCase() === 'x') {
+      checked = true
+    } else if (matches[1] === ' ') {
+      checked = false
+    }
     const replacements = matches[0].match(/(^[>\s-]*(?:[-+*]|\d+[.)])\s\[)([xX ])(])/)
-    window.editor.replaceRange(checked ? ' ' : 'x', {
-      line: startline,
-      ch: replacements[1].length
-    }, {
-      line: startline,
-      ch: replacements[1].length + 1
-    }, '+input')
+    window.editor.replaceRange(
+      checked ? ' ' : 'x',
+      {
+        line: startline,
+        ch: replacements[1].length
+      },
+      {
+        line: startline,
+        ch: replacements[1].length + 1
+      },
+      '+input'
+    )
   }
 }
 
 // remove hash
-function removeHash () {
+function removeHash() {
   history.pushState('', document.title, window.location.pathname + window.location.search)
 }
 
 let tocExpand = false
 
-function checkExpandToggle () {
+function checkExpandToggle() {
   const toc = $('.ui-toc-dropdown .toc')
   const toggle = $('.expand-toggle')
   if (!tocExpand) {
@@ -763,7 +869,7 @@ function checkExpandToggle () {
 }
 
 // toc
-export function generateToc (id) {
+export function generateToc(id) {
   const target = $(`#${id}`)
   target.html('')
   /* eslint-disable no-unused-vars */
@@ -776,28 +882,34 @@ export function generateToc (id) {
     process: getHeaderContent
   })
   /* eslint-enable no-unused-vars */
-  if (target.text() === 'undefined') { target.html('') }
+  if (target.text() === 'undefined') {
+    target.html('')
+  }
   const tocMenu = $('<div class="toc-menu"></div')
   const toggle = $('<a class="expand-toggle" href="#">Expand all</a>')
   const backtotop = $('<a class="back-to-top" href="#">Back to top</a>')
   const gotobottom = $('<a class="go-to-bottom" href="#">Go to bottom</a>')
   checkExpandToggle()
-  toggle.click(e => {
+  toggle.click((e) => {
     e.preventDefault()
     e.stopPropagation()
     tocExpand = !tocExpand
     checkExpandToggle()
   })
-  backtotop.click(e => {
+  backtotop.click((e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (window.scrollToTop) { window.scrollToTop() }
+    if (window.scrollToTop) {
+      window.scrollToTop()
+    }
     removeHash()
   })
-  gotobottom.click(e => {
+  gotobottom.click((e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (window.scrollToBottom) { window.scrollToBottom() }
+    if (window.scrollToBottom) {
+      window.scrollToBottom()
+    }
     removeHash()
   })
   tocMenu.append(toggle).append(backtotop).append(gotobottom)
@@ -805,7 +917,7 @@ export function generateToc (id) {
 }
 
 // smooth all hash trigger scrolling
-export function smoothHashScroll () {
+export function smoothHashScroll() {
   const hashElements = $("a[href^='#']:not([smoothhashscroll])").toArray()
 
   for (const element of hashElements) {
@@ -822,28 +934,37 @@ export function smoothHashScroll () {
         // prevent default anchor click behavior
         e.preventDefault()
         // animate
-        $('body, html').stop(true, true).animate({
-          scrollTop: $hash.offset().top
-        }, 100, 'linear', () => {
-          // when done, add hash to url
-          // (default click behaviour)
-          window.location.hash = hash
-        })
+        $('body, html')
+          .stop(true, true)
+          .animate(
+            {
+              scrollTop: $hash.offset().top
+            },
+            100,
+            'linear',
+            () => {
+              // when done, add hash to url
+              // (default click behaviour)
+              window.location.hash = hash
+            }
+          )
       })
       $element.attr('smoothhashscroll', '')
     }
   }
 }
 
-function imgPlayiframe (element, src) {
+function imgPlayiframe(element, src) {
   if (!$(element).attr('data-videoid')) return
-  const iframe = $("<iframe frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>")
+  const iframe = $(
+    "<iframe frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>"
+  )
   $(iframe).attr('src', `${src + $(element).attr('data-videoid')}?autoplay=1`)
   $(element).find('img').css('visibility', 'hidden')
   $(element).append(iframe)
 }
 
-const anchorForId = id => {
+const anchorForId = (id) => {
   const anchor = document.createElement('a')
   anchor.className = 'anchor hidden-xs'
   anchor.href = `#${id}`
@@ -898,7 +1019,7 @@ const linkifyAnchors = (level, containingElement) => {
   }
 }
 
-export function autoLinkify (view) {
+export function autoLinkify(view) {
   const contentBlock = view[0]
   if (!contentBlock) {
     return
@@ -908,21 +1029,21 @@ export function autoLinkify (view) {
   }
 }
 
-function getHeaderContent (header) {
+function getHeaderContent(header) {
   const headerHTML = $(header).clone()
   headerHTML.find('.MathJax_Preview').remove()
   headerHTML.find('.MathJax').remove()
   return headerHTML[0].innerHTML
 }
 
-function changeHeaderId ($header, id, newId) {
+function changeHeaderId($header, id, newId) {
   $header.attr('id', newId)
   const $headerLink = $header.find(`> a.anchor[href="#${id}"]`)
   $headerLink.attr('href', `#${newId}`)
   $headerLink.attr('title', newId)
 }
 
-export function deduplicatedHeaderId (view) {
+export function deduplicatedHeaderId(view) {
   // headers contained in the last change
   const headers = view.find(':header.raw').removeClass('raw').toArray()
   if (headers.length === 0) {
@@ -957,7 +1078,7 @@ export function deduplicatedHeaderId (view) {
   }
 }
 
-export function renderTOC (view) {
+export function renderTOC(view) {
   const tocs = view.find('.toc').toArray()
   for (let i = 0; i < tocs.length; i++) {
     const toc = $(tocs[i])
@@ -974,19 +1095,23 @@ export function renderTOC (view) {
       process: getHeaderContent
     })
     /* eslint-enable no-unused-vars */
-    if (target.text() === 'undefined') { target.html('') }
+    if (target.text() === 'undefined') {
+      target.html('')
+    }
     target.replaceWith(target.html())
   }
 }
 
-export function scrollToHash () {
+export function scrollToHash() {
   const hash = location.hash
   location.hash = ''
   location.hash = hash
 }
 
-function highlightRender (code, lang) {
-  if (!lang || /no(-?)highlight|plain|text/.test(lang)) { return }
+function highlightRender(code, lang) {
+  if (!lang || /no(-?)highlight|plain|text/.test(lang)) {
+    return
+  }
   code = S(code).escapeHTML().s
   if (lang === 'sequence') {
     return `<div class="sequence-diagram raw">${code}</div>`
@@ -1006,14 +1131,18 @@ function highlightRender (code, lang) {
   if (showlinenumbers) {
     let startnumber = 1
     const matches = lang.match(/=(\d+)$/)
-    if (matches) { startnumber = parseInt(matches[1]) }
+    if (matches) {
+      startnumber = parseInt(matches[1])
+    }
     const lines = result.value.split('\n')
     const linenumbers = []
     for (let i = 0; i < lines.length - 1; i++) {
       linenumbers[i] = `<span data-linenumber='${startnumber + i}'></span>`
     }
     const continuelinenumber = /=\+$/.test(lang)
-    const linegutter = `<div class='gutter linenumber${continuelinenumber ? ' continue' : ''}'>${linenumbers.join('\n')}</div>`
+    const linegutter = `<div class='gutter linenumber${
+      continuelinenumber ? ' continue' : ''
+    }'>${linenumbers.join('\n')}</div>`
     result.value = `<div class='wrapper'>${linegutter}<div class='code'>${result.value}</div></div>`
   }
   return result.value
@@ -1036,14 +1165,16 @@ md.use(require('markdown-it-mark'))
 md.use(require('markdown-it-ins'))
 md.use(require('markdown-it-sub'))
 md.use(require('markdown-it-sup'))
-md.use(require('markdown-it-mathjax')({
-  beforeMath: '<span class="mathjax raw">',
-  afterMath: '</span>',
-  beforeInlineMath: '<span class="mathjax raw">\\(',
-  afterInlineMath: '\\)</span>',
-  beforeDisplayMath: '<span class="mathjax raw">\\[',
-  afterDisplayMath: '\\]</span>'
-}))
+md.use(
+  require('markdown-it-mathjax')({
+    beforeMath: '<span class="mathjax raw">',
+    afterMath: '</span>',
+    beforeInlineMath: '<span class="mathjax raw">\\(',
+    afterInlineMath: '\\)</span>',
+    beforeDisplayMath: '<span class="mathjax raw">\\[',
+    afterDisplayMath: '\\]</span>'
+  })
+)
 md.use(require('markdown-it-imsize'))
 
 md.use(require('markdown-it-emoji'), {
@@ -1061,7 +1192,7 @@ window.emojify.setConfig({
 
 md.renderer.rules.emoji = (token, idx) => window.emojify.replace(`:${token[idx].markup}:`)
 
-function renderContainer (tokens, idx, options, env, self) {
+function renderContainer(tokens, idx, options, env, self) {
   tokens[idx].attrJoin('role', 'alert')
   tokens[idx].attrJoin('class', 'alert')
   tokens[idx].attrJoin('class', `alert-${tokens[idx].info.trim()}`)
@@ -1098,13 +1229,17 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   if (info) {
     langName = info.split(/\s+/g)[0]
     if (/!$/.test(info)) token.attrJoin('class', 'wrap')
-    token.attrJoin('class', options.langPrefix + langName.replace(/=$|=\d+$|=\+$|!$|=!$/, ''))
+    token.attrJoin(
+      'class',
+      options.langPrefix + langName.replace(/=$|=\d+$|=\+$|!$|=!$/, '')
+    )
     token.attrJoin('class', 'hljs')
     token.attrJoin('class', 'raw')
   }
 
   if (options.highlight) {
-    highlighted = options.highlight(token.content, langName) || md.utils.escapeHtml(token.content)
+    highlighted =
+      options.highlight(token.content, langName) || md.utils.escapeHtml(token.content)
   } else {
     highlighted = md.utils.escapeHtml(token.content)
   }
@@ -1209,23 +1344,34 @@ const emojijsPlugin = new Plugin(
   // regexp to match emoji shortcodes :something:
   // We generate an universal regex that guaranteed only contains the
   // emojies we have available. This should prevent all false-positives
-  new RegExp(':(' + window.emojify.emojiNames.map((item) => { return RegExp.escape(item) }).join('|') + '):', 'i'),
+  new RegExp(
+    ':(' +
+      window.emojify.emojiNames
+        .map((item) => {
+          return RegExp.escape(item)
+        })
+        .join('|') +
+      '):',
+    'i'
+  ),
 
   (match, utils) => {
     const emoji = match[1].toLowerCase()
-    const div = $(`<img class="emoji" alt=":${emoji}:" src="${serverurl}/build/emojify.js/dist/images/basic/${emoji}.png"></img>`)
+    const div = $(
+      `<img class="emoji" alt=":${emoji}:" src="${serverurl}/build/emojify.js/dist/images/basic/${emoji}.png"></img>`
+    )
     return div[0].outerHTML
   }
 )
 
 // yaml meta, from https://github.com/eugeneware/remarkable-meta
-function get (state, line) {
+function get(state, line) {
   const pos = state.bMarks[line]
   const max = state.eMarks[line]
   return state.src.substr(pos, max - pos)
 }
 
-function meta (state, start, end, silent) {
+function meta(state, start, end, silent) {
   if (start !== 0 || state.blkIndent !== 0) return false
   if (state.tShift[start] < 0) return false
   if (!get(state, start).match(/^---$/)) return false
@@ -1255,7 +1401,7 @@ function meta (state, start, end, silent) {
   return true
 }
 
-function metaPlugin (md) {
+function metaPlugin(md) {
   md.meta = md.meta || {}
   md.block.ruler.before('code', 'meta', meta, {
     alt: []

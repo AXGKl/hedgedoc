@@ -8,7 +8,7 @@ import { md } from '../extra'
 import modeType from './modeType'
 import appState from './appState'
 
-function addPart (tokens, idx) {
+function addPart(tokens, idx) {
   if (tokens[idx].map && tokens[idx].level === 0) {
     const startline = tokens[idx].map[0] + 1
     const endline = tokens[idx].map[1]
@@ -67,13 +67,17 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   if (info) {
     langName = info.split(/\s+/g)[0]
     if (/!$/.test(info)) token.attrJoin('class', 'wrap')
-    token.attrJoin('class', options.langPrefix + langName.replace(/=$|=\d+$|=\+$|!$|=!/, ''))
+    token.attrJoin(
+      'class',
+      options.langPrefix + langName.replace(/=$|=\d+$|=\+$|!$|=!/, '')
+    )
     token.attrJoin('class', 'hljs')
     token.attrJoin('class', 'raw')
   }
 
   if (options.highlight) {
-    highlighted = options.highlight(token.content, langName) || md.utils.escapeHtml(token.content)
+    highlighted =
+      options.highlight(token.content, langName) || md.utils.escapeHtml(token.content)
   } else {
     highlighted = md.utils.escapeHtml(token.content)
   }
@@ -85,7 +89,9 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   if (tokens[idx].map && tokens[idx].level === 0) {
     const startline = tokens[idx].map[0] + 1
     const endline = tokens[idx].map[1]
-    return `<pre class="part" data-startline="${startline}" data-endline="${endline}"><code${self.renderAttrs(token)}>${highlighted}</code></pre>\n`
+    return `<pre class="part" data-startline="${startline}" data-endline="${endline}"><code${self.renderAttrs(
+      token
+    )}>${highlighted}</code></pre>\n`
   }
 
   return `<pre><code${self.renderAttrs(token)}>${highlighted}</code></pre>\n`
@@ -94,11 +100,13 @@ md.renderer.rules.code_block = (tokens, idx, options, env, self) => {
   if (tokens[idx].map && tokens[idx].level === 0) {
     const startline = tokens[idx].map[0] + 1
     const endline = tokens[idx].map[1]
-    return `<pre class="part" data-startline="${startline}" data-endline="${endline}"><code>${md.utils.escapeHtml(tokens[idx].content)}</code></pre>\n`
+    return `<pre class="part" data-startline="${startline}" data-endline="${endline}"><code>${md.utils.escapeHtml(
+      tokens[idx].content
+    )}</code></pre>\n`
   }
   return `<pre><code>${md.utils.escapeHtml(tokens[idx].content)}</code></pre>\n`
 }
-function renderContainer (tokens, idx, options, env, self) {
+function renderContainer(tokens, idx, options, env, self) {
   tokens[idx].attrJoin('role', 'alert')
   tokens[idx].attrJoin('class', 'alert')
   tokens[idx].attrJoin('class', `alert-${tokens[idx].info.trim()}`)
@@ -127,7 +135,7 @@ let markdownArea = null
 
 let editor
 
-export function setupSyncAreas (edit, view, markdown, _editor) {
+export function setupSyncAreas(edit, view, markdown, _editor) {
   editArea = edit
   viewArea = view
   markdownArea = markdown
@@ -140,7 +148,7 @@ export function setupSyncAreas (edit, view, markdown, _editor) {
 
 let scrollMap, lineHeightMap, viewTop, viewBottom
 
-export function clearMap () {
+export function clearMap() {
   scrollMap = null
   lineHeightMap = null
   viewTop = null
@@ -153,7 +161,7 @@ const buildMap = _.throttle(buildMapInner, buildMapThrottle)
 // Build offsets for each line (lines can be wrapped)
 // That's a bit dirty to process each line everytime, but ok for demo.
 // Optimizations are required only for big texts.
-function buildMapInner (callback) {
+function buildMapInner(callback) {
   if (!viewArea || !markdownArea) return
   let i, pos, a, b, acc
 
@@ -217,7 +225,9 @@ function buildMapInner (callback) {
 
     a = nonEmptyList[pos]
     b = nonEmptyList[pos + 1]
-    _scrollMap[i] = Math.round((_scrollMap[b] * (i - a) + _scrollMap[a] * (b - i)) / (b - a))
+    _scrollMap[i] = Math.round(
+      (_scrollMap[b] * (i - a) + _scrollMap[a] * (b - i)) / (b - a)
+    )
   }
 
   _scrollMap[0] = 0
@@ -231,7 +241,7 @@ function buildMapInner (callback) {
 // sync view scroll progress to edit
 let viewScrollingTimer = null
 
-export function syncScrollToEdit (event, preventAnimate) {
+export function syncScrollToEdit(event, preventAnimate) {
   if (appState.currentMode !== modeType.both || !appState.syncscroll || !editArea) return
   if (window.preventSyncScrollToEdit) {
     if (typeof window.preventSyncScrollToEdit === 'number') {
@@ -285,7 +295,8 @@ export function syncScrollToEdit (event, preventAnimate) {
     posTo += Math.ceil(posToNextDiff)
   } else {
     posTo = lineNo * textHeight
-    topDiffPercent = (scrollTop - scrollMap[lineNo]) / (scrollMap[lineNo + lineDiff] - scrollMap[lineNo])
+    topDiffPercent =
+      (scrollTop - scrollMap[lineNo]) / (scrollMap[lineNo + lineDiff] - scrollMap[lineNo])
     posToNextDiff = textHeight * lineDiff * topDiffPercent
     posTo += Math.ceil(posToNextDiff)
   }
@@ -297,9 +308,13 @@ export function syncScrollToEdit (event, preventAnimate) {
     const posDiff = Math.abs(scrollInfo.top - posTo)
     duration = posDiff / 50
     duration = duration >= 100 ? duration : 100
-    editArea.stop(true, true).animate({
-      scrollTop: posTo
-    }, duration, 'linear')
+    editArea.stop(true, true).animate(
+      {
+        scrollTop: posTo
+      },
+      duration,
+      'linear'
+    )
   }
 
   viewScrolling = true
@@ -307,14 +322,14 @@ export function syncScrollToEdit (event, preventAnimate) {
   viewScrollingTimer = setTimeout(viewScrollingTimeoutInner, duration * 1.5)
 }
 
-function viewScrollingTimeoutInner () {
+function viewScrollingTimeoutInner() {
   viewScrolling = false
 }
 
 // sync edit scroll progress to view
 let editScrollingTimer = null
 
-export function syncScrollToView (event, preventAnimate) {
+export function syncScrollToView(event, preventAnimate) {
   if (appState.currentMode !== modeType.both || !appState.syncscroll || !viewArea) return
   if (window.preventSyncScrollToView) {
     if (typeof preventSyncScrollToView === 'number') {
@@ -338,7 +353,8 @@ export function syncScrollToView (event, preventAnimate) {
   const textHeight = editor.defaultTextHeight()
   const lineNo = Math.floor(scrollInfo.top / textHeight)
   // if reach the last line, will start lerp to the bottom
-  const diffToBottom = (scrollInfo.top + scrollInfo.clientHeight) - (scrollInfo.height - textHeight)
+  const diffToBottom =
+    scrollInfo.top + scrollInfo.clientHeight - (scrollInfo.height - textHeight)
   if (scrollInfo.height > scrollInfo.clientHeight && diffToBottom > 0) {
     topDiffPercent = diffToBottom / textHeight
     posTo = scrollMap[lineNo + 1]
@@ -358,9 +374,13 @@ export function syncScrollToView (event, preventAnimate) {
     const posDiff = Math.abs(viewArea.scrollTop() - posTo)
     duration = posDiff / 50
     duration = duration >= 100 ? duration : 100
-    viewArea.stop(true, true).animate({
-      scrollTop: posTo
-    }, duration, 'linear')
+    viewArea.stop(true, true).animate(
+      {
+        scrollTop: posTo
+      },
+      duration,
+      'linear'
+    )
   }
 
   editScrolling = true
@@ -368,6 +388,6 @@ export function syncScrollToView (event, preventAnimate) {
   editScrollingTimer = setTimeout(editScrollingTimeoutInner, duration * 1.5)
 }
 
-function editScrollingTimeoutInner () {
+function editScrollingTimeoutInner() {
   editScrolling = false
 }

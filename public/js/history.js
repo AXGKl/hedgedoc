@@ -7,31 +7,24 @@ import S from 'string'
 import LZString from 'lz-string'
 import url from 'wurl'
 
-import {
-  checkNoteIdValid,
-  encodeNoteId
-} from './utils'
+import { checkNoteIdValid, encodeNoteId } from './utils'
 
-import {
-  checkIfAuth
-} from './lib/common/login'
+import { checkIfAuth } from './lib/common/login'
 
-import {
-  urlpath
-} from './lib/config'
+import { urlpath } from './lib/config'
 
 window.migrateHistoryFromTempCallback = null
 
 migrateHistoryFromTemp()
 
-function migrateHistoryFromTemp () {
+function migrateHistoryFromTemp() {
   if (url('#tempid')) {
     $.get(`${serverurl}/temp`, {
       tempid: url('#tempid')
     })
-      .done(data => {
+      .done((data) => {
         if (data && data.temp) {
-          getStorageHistory(olddata => {
+          getStorageHistory((olddata) => {
             if (!olddata || olddata.length === 0) {
               saveHistoryToStorage(JSON.parse(data.temp))
             }
@@ -49,12 +42,14 @@ function migrateHistoryFromTemp () {
         }
         hash = hash.join('&')
         location.hash = hash
-        if (window.migrateHistoryFromTempCallback) { window.migrateHistoryFromTempCallback() }
+        if (window.migrateHistoryFromTempCallback) {
+          window.migrateHistoryFromTempCallback()
+        }
       })
   }
 }
 
-export function saveHistory (notehistory) {
+export function saveHistory(notehistory) {
   checkIfAuth(
     () => {
       saveHistoryToServer(notehistory)
@@ -65,38 +60,48 @@ export function saveHistory (notehistory) {
   )
 }
 
-function saveHistoryToStorage (notehistory) {
+function saveHistoryToStorage(notehistory) {
   store.set('notehistory', JSON.stringify(notehistory))
 }
 
-function saveHistoryToServer (notehistory) {
+function saveHistoryToServer(notehistory) {
   $.post(`${serverurl}/history`, {
     history: JSON.stringify(notehistory)
   })
 }
 
-export function saveStorageHistoryToServer (callback) {
+export function saveStorageHistoryToServer(callback) {
   const data = store.get('notehistory')
   if (data) {
     $.post(`${serverurl}/history`, {
       history: data
+    }).done((data) => {
+      callback(data)
     })
-      .done(data => {
-        callback(data)
-      })
   }
 }
 
-export function clearDuplicatedHistory (notehistory) {
+export function clearDuplicatedHistory(notehistory) {
   const newnotehistory = []
   for (let i = 0; i < notehistory.length; i++) {
     let found = false
     for (let j = 0; j < newnotehistory.length; j++) {
       const id = notehistory[i].id.replace(/=+$/, '')
       const newId = newnotehistory[j].id.replace(/=+$/, '')
-      if (id === newId || notehistory[i].id === newnotehistory[j].id || !notehistory[i].id || !newnotehistory[j].id) {
-        const time = (typeof notehistory[i].time === 'number' ? moment(notehistory[i].time) : moment(notehistory[i].time, 'MMMM Do YYYY, h:mm:ss a'))
-        const newTime = (typeof newnotehistory[i].time === 'number' ? moment(newnotehistory[i].time) : moment(newnotehistory[i].time, 'MMMM Do YYYY, h:mm:ss a'))
+      if (
+        id === newId ||
+        notehistory[i].id === newnotehistory[j].id ||
+        !notehistory[i].id ||
+        !newnotehistory[j].id
+      ) {
+        const time =
+          typeof notehistory[i].time === 'number'
+            ? moment(notehistory[i].time)
+            : moment(notehistory[i].time, 'MMMM Do YYYY, h:mm:ss a')
+        const newTime =
+          typeof newnotehistory[i].time === 'number'
+            ? moment(newnotehistory[i].time)
+            : moment(newnotehistory[i].time, 'MMMM Do YYYY, h:mm:ss a')
         if (time >= newTime) {
           newnotehistory[j] = notehistory[i]
         }
@@ -104,12 +109,14 @@ export function clearDuplicatedHistory (notehistory) {
         break
       }
     }
-    if (!found) { newnotehistory.push(notehistory[i]) }
+    if (!found) {
+      newnotehistory.push(notehistory[i])
+    }
   }
   return newnotehistory
 }
 
-function addHistory (id, text, time, tags, pinned, notehistory) {
+function addHistory(id, text, time, tags, pinned, notehistory) {
   // only add when note id exists
   if (id) {
     notehistory.push({
@@ -123,7 +130,7 @@ function addHistory (id, text, time, tags, pinned, notehistory) {
   return notehistory
 }
 
-export function removeHistory (id, notehistory) {
+export function removeHistory(id, notehistory) {
   for (let i = 0; i < notehistory.length; i++) {
     if (notehistory[i].id === id) {
       notehistory.splice(i, 1)
@@ -134,7 +141,7 @@ export function removeHistory (id, notehistory) {
 }
 
 // used for inner
-export function writeHistory (title, tags) {
+export function writeHistory(title, tags) {
   checkIfAuth(
     () => {
       // no need to do this anymore, this will count from server-side
@@ -146,7 +153,7 @@ export function writeHistory (title, tags) {
   )
 }
 
-function writeHistoryToStorage (title, tags) {
+function writeHistoryToStorage(title, tags) {
   const data = store.get('notehistory')
   let notehistory
   if (data && typeof data === 'string') {
@@ -160,12 +167,14 @@ function writeHistoryToStorage (title, tags) {
 }
 
 if (!Array.isArray) {
-  Array.isArray = arg => Object.prototype.toString.call(arg) === '[object Array]'
+  Array.isArray = (arg) => Object.prototype.toString.call(arg) === '[object Array]'
 }
 
-function renderHistory (title, tags) {
+function renderHistory(title, tags) {
   // console.debug(tags);
-  const id = urlpath ? location.pathname.slice(urlpath.length + 1, location.pathname.length).split('/')[1] : location.pathname.split('/')[1]
+  const id = urlpath
+    ? location.pathname.slice(urlpath.length + 1, location.pathname.length).split('/')[1]
+    : location.pathname.split('/')[1]
   return {
     id,
     text: title,
@@ -174,7 +183,7 @@ function renderHistory (title, tags) {
   }
 }
 
-function generateHistory (title, tags, notehistory) {
+function generateHistory(title, tags, notehistory) {
   const info = renderHistory(title, tags)
   // keep any pinned data
   let pinned = false
@@ -191,7 +200,7 @@ function generateHistory (title, tags, notehistory) {
 }
 
 // used for outer
-export function getHistory (callback) {
+export function getHistory(callback) {
   checkIfAuth(
     () => {
       getServerHistory(callback)
@@ -202,9 +211,9 @@ export function getHistory (callback) {
   )
 }
 
-function getServerHistory (callback) {
+function getServerHistory(callback) {
   $.get(`${serverurl}/history`)
-    .done(data => {
+    .done((data) => {
       if (data.history) {
         callback(data.history)
       }
@@ -214,17 +223,19 @@ function getServerHistory (callback) {
     })
 }
 
-export function getStorageHistory (callback) {
+export function getStorageHistory(callback) {
   let data = store.get('notehistory')
   if (data) {
-    if (typeof data === 'string') { data = JSON.parse(data) }
+    if (typeof data === 'string') {
+      data = JSON.parse(data)
+    }
     callback(data)
   }
   // eslint-disable-next-line n/no-callback-literal
   callback([])
 }
 
-export function parseHistory (list, callback) {
+export function parseHistory(list, callback) {
   checkIfAuth(
     () => {
       parseServerToHistory(list, callback)
@@ -235,9 +246,9 @@ export function parseHistory (list, callback) {
   )
 }
 
-export function parseServerToHistory (list, callback) {
+export function parseServerToHistory(list, callback) {
   $.get(`${serverurl}/history`)
-    .done(data => {
+    .done((data) => {
       if (data.history) {
         parseToHistory(list, data.history, callback)
       }
@@ -247,16 +258,18 @@ export function parseServerToHistory (list, callback) {
     })
 }
 
-export function parseStorageToHistory (list, callback) {
+export function parseStorageToHistory(list, callback) {
   let data = store.get('notehistory')
   if (data) {
-    if (typeof data === 'string') { data = JSON.parse(data) }
+    if (typeof data === 'string') {
+      data = JSON.parse(data)
+    }
     parseToHistory(list, data, callback)
   }
   parseToHistory(list, [], callback)
 }
 
-function parseToHistory (list, notehistory, callback) {
+function parseToHistory(list, notehistory, callback) {
   if (!callback) return
   else if (!list || !notehistory) callback(list, notehistory)
   else if (notehistory && notehistory.length > 0) {
@@ -271,35 +284,43 @@ function parseToHistory (list, notehistory, callback) {
         console.error(err)
       }
       // parse time to timestamp and fromNow
-      const timestamp = (typeof notehistory[i].time === 'number' ? moment(notehistory[i].time) : moment(notehistory[i].time, 'MMMM Do YYYY, h:mm:ss a'))
+      const timestamp =
+        typeof notehistory[i].time === 'number'
+          ? moment(notehistory[i].time)
+          : moment(notehistory[i].time, 'MMMM Do YYYY, h:mm:ss a')
       notehistory[i].timestamp = timestamp.valueOf()
       notehistory[i].fromNow = timestamp.fromNow()
       notehistory[i].time = timestamp.format('llll')
       // prevent XSS
       notehistory[i].text = S(notehistory[i].text).escapeHTML().s
-      notehistory[i].tags = (notehistory[i].tags && notehistory[i].tags.length > 0) ? S(notehistory[i].tags).escapeHTML().s.split(',') : []
+      notehistory[i].tags =
+        notehistory[i].tags && notehistory[i].tags.length > 0
+          ? S(notehistory[i].tags).escapeHTML().s.split(',')
+          : []
       // add to list
-      if (notehistory[i].id && list.get('id', notehistory[i].id).length === 0) { list.add(notehistory[i]) }
+      if (notehistory[i].id && list.get('id', notehistory[i].id).length === 0) {
+        list.add(notehistory[i])
+      }
     }
   }
   callback(list, notehistory)
 }
 
-export function postHistoryToServer (noteId, data, callback) {
+export function postHistoryToServer(noteId, data, callback) {
   $.post(`${serverurl}/history/${noteId}`, data)
-    .done(result => callback(null, result))
+    .done((result) => callback(null, result))
     .fail((xhr, status, error) => {
       console.error(xhr.responseText)
       return callback(error, null)
     })
 }
 
-export function deleteServerHistory (noteId, callback) {
+export function deleteServerHistory(noteId, callback) {
   $.ajax({
     url: `${serverurl}/history${noteId ? '/' + noteId : ''}`,
     type: 'DELETE'
   })
-    .done(result => callback(null, result))
+    .done((result) => callback(null, result))
     .fail((xhr, status, error) => {
       console.error(xhr.responseText)
       return callback(error, null)

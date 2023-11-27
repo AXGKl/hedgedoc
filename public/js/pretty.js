@@ -76,13 +76,13 @@ const toc = $('.ui-toc')
 const tocAffix = $('.ui-affix-toc')
 const tocDropdown = $('.ui-toc-dropdown')
 // toc
-tocDropdown.click(e => {
+tocDropdown.click((e) => {
   e.stopPropagation()
 })
 
 let enoughForAffixToc = true
 
-function generateScrollspy () {
+function generateScrollspy() {
   $(document.body).scrollspy({
     target: ''
   })
@@ -97,10 +97,11 @@ function generateScrollspy () {
   $(document.body).scroll()
 }
 
-function windowResize () {
+function windowResize() {
   // toc right
   const paddingRight = parseFloat(markdown.css('padding-right'))
-  const right = ($(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight))
+  const right =
+    $(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight)
   toc.css('right', `${right}px`)
   // affix toc left
   let newbool
@@ -130,16 +131,26 @@ $(document).ready(() => {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
-export function scrollToTop () {
-  $('body, html').stop(true, true).animate({
-    scrollTop: 0
-  }, 100, 'linear')
+export function scrollToTop() {
+  $('body, html').stop(true, true).animate(
+    {
+      scrollTop: 0
+    },
+    100,
+    'linear'
+  )
 }
 
-export function scrollToBottom () {
-  $('body, html').stop(true, true).animate({
-    scrollTop: $(document.body)[0].scrollHeight
-  }, 100, 'linear')
+export function scrollToBottom() {
+  $('body, html')
+    .stop(true, true)
+    .animate(
+      {
+        scrollTop: $(document.body)[0].scrollHeight
+      },
+      100,
+      'linear'
+    )
 }
 
 window.scrollToTop = scrollToTop

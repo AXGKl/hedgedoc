@@ -8,7 +8,8 @@ window.whiteListAttr = whiteListAttr
 // allow link starts with '.', '/' and custom protocol with '://', exclude link starts with javascript://
 const linkRegex = /^(?!javascript:\/\/)([\w|-]+:\/\/)|^([.|/])+/i
 // allow data uri, from https://gist.github.com/bgrins/6194623
-const dataUriRegex = /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@/?%\s]*)\s*$/i
+const dataUriRegex =
+  /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@/?%\s]*)\s*$/i
 // custom white list
 const whiteList = filterXSS.whiteList
 // allow ol specify start number
@@ -39,13 +40,21 @@ const filterXSSOptions = {
   whiteList,
   escapeHtml: function (html) {
     // allow html comment in multiple lines
-    return html.replace(/<(?!!--)/g, '&lt;').replace(/-->/g, '__HTML_COMMENT_END__').replace(/>/g, '&gt;').replace(/__HTML_COMMENT_END__/g, '-->')
+    return html
+      .replace(/<(?!!--)/g, '&lt;')
+      .replace(/-->/g, '__HTML_COMMENT_END__')
+      .replace(/>/g, '&gt;')
+      .replace(/__HTML_COMMENT_END__/g, '-->')
   },
   onIgnoreTag: function (tag, html, options) {
     // allow comment tag
     if (tag === '!--') {
       // do not filter its attributes
-      return html.replace(/<(?!!--)/g, '&lt;').replace(/-->/g, '__HTML_COMMENT_END__').replace(/>/g, '&gt;').replace(/__HTML_COMMENT_END__/g, '-->')
+      return html
+        .replace(/<(?!!--)/g, '&lt;')
+        .replace(/-->/g, '__HTML_COMMENT_END__')
+        .replace(/>/g, '&gt;')
+        .replace(/__HTML_COMMENT_END__/g, '-->')
     }
   },
   onTagAttr: function (tag, name, value, isWhiteAttr) {
@@ -54,7 +63,7 @@ const filterXSSOptions = {
       return name + '="' + filterXSS.escapeAttrValue(value) + '"'
     }
     // allow data uri in img src
-    if (isWhiteAttr && (tag === 'img' && name === 'src') && dataUriRegex.test(value)) {
+    if (isWhiteAttr && tag === 'img' && name === 'src' && dataUriRegex.test(value)) {
       return name + '="' + filterXSS.escapeAttrValue(value) + '"'
     }
   },
@@ -67,7 +76,7 @@ const filterXSSOptions = {
   }
 }
 
-function preventXSS (html) {
+function preventXSS(html) {
   return filterXSS(html, filterXSSOptions)
 }
 window.preventXSS = preventXSS

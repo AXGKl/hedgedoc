@@ -8,7 +8,7 @@ import { md } from './extra'
  * markdown inside of presentations as well as loading
  * of external markdown documents.
  */
-(function (root, factory) {
+;(function (root, factory) {
   if (typeof exports === 'object') {
     module.exports = factory()
   } else {
@@ -16,7 +16,7 @@ import { md } from './extra'
     root.RevealMarkdown = factory()
     root.RevealMarkdown.initialize()
   }
-}(this, function () {
+})(this, function () {
   const DEFAULT_SLIDE_SEPARATOR = '^\r?\n---\r?\n$'
   const DEFAULT_NOTES_SEPARATOR = '^note:'
   const DEFAULT_ELEMENT_ATTRIBUTES_SEPARATOR = '\\.element\\s*?(.+?)$'
@@ -28,7 +28,7 @@ import { md } from './extra'
    * Retrieves the markdown contents of a slide section
    * element. Normalizes leading tabs/whitespace.
    */
-  function getMarkdownFromSlide (section) {
+  function getMarkdownFromSlide(section) {
     const template = section.querySelector('script')
 
     // strip leading whitespace so it isn't evaluated as code
@@ -55,7 +55,7 @@ import { md } from './extra'
    * parsing. Used to forward any other user-defined arguments
    * to the output markdown slide.
    */
-  function getForwardedAttributes (section) {
+  function getForwardedAttributes(section) {
     const attributes = section.attributes
     const result = []
 
@@ -80,7 +80,7 @@ import { md } from './extra'
    * Inspects the given options and fills out default
    * values for what's not defined.
    */
-  function getSlidifyOptions (options) {
+  function getSlidifyOptions(options) {
     options = options || {}
     options.separator = options.separator || DEFAULT_SLIDE_SEPARATOR
     options.notesSeparator = options.notesSeparator || DEFAULT_NOTES_SEPARATOR
@@ -92,13 +92,17 @@ import { md } from './extra'
   /**
    * Helper function for constructing a markdown slide.
    */
-  function createMarkdownSlide (content, options) {
+  function createMarkdownSlide(content, options) {
     options = getSlidifyOptions(options)
 
     const notesMatch = content.split(new RegExp(options.notesSeparator, 'mgi'))
 
     if (notesMatch.length === 2) {
-      content = notesMatch[0] + '<aside class="notes" data-markdown>' + notesMatch[1].trim() + '</aside>'
+      content =
+        notesMatch[0] +
+        '<aside class="notes" data-markdown>' +
+        notesMatch[1].trim() +
+        '</aside>'
     }
 
     // prevent script end tags in the content from interfering
@@ -112,10 +116,14 @@ import { md } from './extra'
    * Parses a data string into multiple slides based
    * on the passed in separator arguments.
    */
-  function slidify (markdown, options) {
+  function slidify(markdown, options) {
     options = getSlidifyOptions(options)
 
-    const separatorRegex = new RegExp(options.separator + (options.verticalSeparator ? '|' + options.verticalSeparator : ''), 'mg')
+    const separatorRegex = new RegExp(
+      options.separator +
+        (options.verticalSeparator ? '|' + options.verticalSeparator : ''),
+      'mg'
+    )
     const horizontalSeparatorRegex = new RegExp(options.separator)
 
     let matches
@@ -151,7 +159,9 @@ import { md } from './extra'
     }
 
     // add the remaining slide
-    (wasHorizontal ? sectionStack : sectionStack[sectionStack.length - 1]).push(markdown.substring(lastIndex))
+    ;(wasHorizontal ? sectionStack : sectionStack[sectionStack.length - 1]).push(
+      markdown.substring(lastIndex)
+    )
 
     let markdownSections = ''
 
@@ -162,12 +172,18 @@ import { md } from './extra'
         markdownSections += '<section ' + options.attributes + '>'
 
         sectionStack[i].forEach(function (child) {
-          markdownSections += '<section data-markdown>' + createMarkdownSlide(child, options) + '</section>'
+          markdownSections +=
+            '<section data-markdown>' + createMarkdownSlide(child, options) + '</section>'
         })
 
         markdownSections += '</section>'
       } else {
-        markdownSections += '<section ' + options.attributes + ' data-markdown>' + createMarkdownSlide(sectionStack[i], options) + '</section>'
+        markdownSections +=
+          '<section ' +
+          options.attributes +
+          ' data-markdown>' +
+          createMarkdownSlide(sectionStack[i], options) +
+          '</section>'
       }
     }
 
@@ -179,7 +195,7 @@ import { md } from './extra'
    * multi-slide markdown into separate sections and
    * handles loading of external markdown.
    */
-  function processSlides () {
+  function processSlides() {
     const sections = document.querySelectorAll('[data-markdown]')
     let section
 
@@ -208,11 +224,16 @@ import { md } from './extra'
                 attributes: getForwardedAttributes(section)
               })
             } else {
-              section.outerHTML = '<section data-state="alert">' +
-              'ERROR: The attempt to fetch ' + url + ' failed with HTTP status ' + xhr.status + '.' +
-              'Check your browser\'s JavaScript console for more details.' +
-              '<p>Remember that you need to serve the presentation HTML from a HTTP server.</p>' +
-              '</section>'
+              section.outerHTML =
+                '<section data-state="alert">' +
+                'ERROR: The attempt to fetch ' +
+                url +
+                ' failed with HTTP status ' +
+                xhr.status +
+                '.' +
+                "Check your browser's JavaScript console for more details." +
+                '<p>Remember that you need to serve the presentation HTML from a HTTP server.</p>' +
+                '</section>'
             }
           }
         }
@@ -222,9 +243,18 @@ import { md } from './extra'
         try {
           xhr.send()
         } catch (e) {
-          alert('Failed to get the Markdown file ' + url + '. Make sure that the presentation and the file are served by a HTTP server and the file can be found there. ' + e)
+          alert(
+            'Failed to get the Markdown file ' +
+              url +
+              '. Make sure that the presentation and the file are served by a HTTP server and the file can be found there. ' +
+              e
+          )
         }
-      } else if (section.getAttribute('data-separator') || section.getAttribute('data-separator-vertical') || section.getAttribute('data-separator-notes')) {
+      } else if (
+        section.getAttribute('data-separator') ||
+        section.getAttribute('data-separator-vertical') ||
+        section.getAttribute('data-separator-notes')
+      ) {
         section.outerHTML = slidify(getMarkdownFromSlide(section), {
           separator: section.getAttribute('data-separator'),
           verticalSeparator: section.getAttribute('data-separator-vertical'),
@@ -246,20 +276,24 @@ import { md } from './extra'
    * directly on refresh (F5)
    * http://stackoverflow.com/questions/5690269/disabling-chrome-cache-for-website-development/7000899#answer-11786277
    */
-  function addAttributeInElement (node, elementTarget, separator) {
+  function addAttributeInElement(node, elementTarget, separator) {
     const mardownClassesInElementsRegex = new RegExp(separator, 'mg')
-    const mardownClassRegex = /([^"= ]+?)="([^"=]+?)"/mg
+    const mardownClassRegex = /([^"= ]+?)="([^"=]+?)"/gm
     let nodeValue = node.nodeValue
     let matches
     let matchesClass
     if ((matches = mardownClassesInElementsRegex.exec(nodeValue))) {
       const classes = matches[1]
-      nodeValue = nodeValue.substring(0, matches.index) + nodeValue.substring(mardownClassesInElementsRegex.lastIndex)
+      nodeValue =
+        nodeValue.substring(0, matches.index) +
+        nodeValue.substring(mardownClassesInElementsRegex.lastIndex)
       node.nodeValue = nodeValue
       while ((matchesClass = mardownClassRegex.exec(classes))) {
         const name = matchesClass[1]
         const value = matchesClass[2]
-        if (name.substr(0, 5) === 'data-' || window.whiteListAttr.indexOf(name) !== -1) { elementTarget.setAttribute(name, escapeAttrValue(value)) }
+        if (name.substr(0, 5) === 'data-' || window.whiteListAttr.indexOf(name) !== -1) {
+          elementTarget.setAttribute(name, escapeAttrValue(value))
+        }
       }
       return true
     }
@@ -270,8 +304,18 @@ import { md } from './extra'
    * Add attributes to the parent element of a text node,
    * or the element of an attribute node.
    */
-  function addAttributes (section, element, previousElement, separatorElementAttributes, separatorSectionAttributes) {
-    if (element != null && element.childNodes !== undefined && element.childNodes.length > 0) {
+  function addAttributes(
+    section,
+    element,
+    previousElement,
+    separatorElementAttributes,
+    separatorSectionAttributes
+  ) {
+    if (
+      element != null &&
+      element.childNodes !== undefined &&
+      element.childNodes.length > 0
+    ) {
       let previousParentElement = element
       for (let i = 0; i < element.childNodes.length; i++) {
         const childElement = element.childNodes[i]
@@ -279,7 +323,10 @@ import { md } from './extra'
           let j = i - 1
           while (j >= 0) {
             const aPreviousChildElement = element.childNodes[j]
-            if (typeof aPreviousChildElement.setAttribute === 'function' && aPreviousChildElement.tagName !== 'BR') {
+            if (
+              typeof aPreviousChildElement.setAttribute === 'function' &&
+              aPreviousChildElement.tagName !== 'BR'
+            ) {
               previousParentElement = aPreviousChildElement
               break
             }
@@ -291,14 +338,26 @@ import { md } from './extra'
           parentSection = childElement
           previousParentElement = childElement
         }
-        if (typeof childElement.setAttribute === 'function' || childElement.nodeType === Node.COMMENT_NODE) {
-          addAttributes(parentSection, childElement, previousParentElement, separatorElementAttributes, separatorSectionAttributes)
+        if (
+          typeof childElement.setAttribute === 'function' ||
+          childElement.nodeType === Node.COMMENT_NODE
+        ) {
+          addAttributes(
+            parentSection,
+            childElement,
+            previousParentElement,
+            separatorElementAttributes,
+            separatorSectionAttributes
+          )
         }
       }
     }
 
     if (element.nodeType === Node.COMMENT_NODE) {
-      if (addAttributeInElement(element, previousElement, separatorElementAttributes) === false) {
+      if (
+        addAttributeInElement(element, previousElement, separatorElementAttributes) ===
+        false
+      ) {
         addAttributeInElement(element, section, separatorSectionAttributes)
       }
     }
@@ -308,7 +367,7 @@ import { md } from './extra'
    * Converts any current data-markdown slides in the
    * DOM to HTML.
    */
-  function convertSlides () {
+  function convertSlides() {
     const sections = document.querySelectorAll('[data-markdown]')
 
     for (let i = 0, len = sections.length; i < len; i++) {
@@ -325,12 +384,17 @@ import { md } from './extra'
         rendered = preventXSS(rendered)
         const result = window.postProcess(rendered)
         section.innerHTML = result[0].outerHTML
-        addAttributes(section, section, null, section.getAttribute('data-element-attributes') ||
-        section.parentNode.getAttribute('data-element-attributes') ||
-        DEFAULT_ELEMENT_ATTRIBUTES_SEPARATOR,
-        section.getAttribute('data-attributes') ||
-        section.parentNode.getAttribute('data-attributes') ||
-        DEFAULT_SLIDE_ATTRIBUTES_SEPARATOR)
+        addAttributes(
+          section,
+          section,
+          null,
+          section.getAttribute('data-element-attributes') ||
+            section.parentNode.getAttribute('data-element-attributes') ||
+            DEFAULT_ELEMENT_ATTRIBUTES_SEPARATOR,
+          section.getAttribute('data-attributes') ||
+            section.parentNode.getAttribute('data-attributes') ||
+            DEFAULT_SLIDE_ATTRIBUTES_SEPARATOR
+        )
 
         // If there were notes, we need to re-add them after
         // having overwritten the section's HTML
@@ -352,4 +416,4 @@ import { md } from './extra'
     convertSlides,
     slidify
   }
-}))
+})

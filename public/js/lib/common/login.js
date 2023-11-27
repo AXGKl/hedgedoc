@@ -9,15 +9,15 @@ let lastLoginState = getLoginState()
 let lastUserId = getUserId()
 let loginStateChangeEvent = null
 
-export function setloginStateChangeEvent (func) {
+export function setloginStateChangeEvent(func) {
   loginStateChangeEvent = func
 }
 
-export function resetCheckAuth () {
+export function resetCheckAuth() {
   checkAuth = false
 }
 
-export function setLoginState (bool, id) {
+export function setLoginState(bool, id) {
   Cookies.set('loginstate', bool, {
     expires: 365,
     sameSite: window.cookiePolicy,
@@ -40,7 +40,7 @@ export function setLoginState (bool, id) {
   checkLoginStateChanged()
 }
 
-export function checkLoginStateChanged () {
+export function checkLoginStateChanged() {
   if (getLoginState() !== lastLoginState || getUserId() !== lastUserId) {
     if (loginStateChangeEvent) setTimeout(loginStateChangeEvent, 100)
     return true
@@ -49,25 +49,25 @@ export function checkLoginStateChanged () {
   }
 }
 
-export function getLoginState () {
+export function getLoginState() {
   const state = Cookies.get('loginstate')
   return state === 'true' || state === true
 }
 
-export function getUserId () {
+export function getUserId() {
   return Cookies.get('userid')
 }
 
-export function clearLoginState () {
+export function clearLoginState() {
   Cookies.remove('loginstate')
 }
 
-export function checkIfAuth (yesCallback, noCallback) {
+export function checkIfAuth(yesCallback, noCallback) {
   const cookieLoginState = getLoginState()
   if (checkLoginStateChanged()) checkAuth = false
   if (!checkAuth || typeof cookieLoginState === 'undefined') {
     $.get(`${serverurl}/me`)
-      .done(data => {
+      .done((data) => {
         if (data && data.status === 'ok') {
           profile = data
           yesCallback(profile)

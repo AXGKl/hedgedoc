@@ -7,31 +7,33 @@
  */
 
 if (typeof jQuery === 'undefined') {
-  throw new Error('jQuery.textcomplete requires jQuery');
+  throw new Error('jQuery.textcomplete requires jQuery')
 }
 
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
   var warn = function (message) {
-    if (console.warn) { console.warn(message); }
-  };
+    if (console.warn) {
+      console.warn(message)
+    }
+  }
 
   $.fn.textcomplete = function (strategies, option) {
-    var args = Array.prototype.slice.call(arguments);
+    var args = Array.prototype.slice.call(arguments)
     return this.each(function () {
-      var $this = $(this);
-      var completer = $this.data('textComplete');
+      var $this = $(this)
+      var completer = $this.data('textComplete')
       if (!completer) {
-        completer = new $.fn.textcomplete.Completer(this, option || {});
-        $this.data('textComplete', completer);
+        completer = new $.fn.textcomplete.Completer(this, option || {})
+        $this.data('textComplete', completer)
       }
       if (typeof strategies === 'string') {
-        if (!completer) return;
+        if (!completer) return
         args.shift()
-        completer[strategies].apply(completer, args);
+        completer[strategies].apply(completer, args)
         if (strategies === 'destroy') {
-          $this.removeData('textComplete');
+          $this.removeData('textComplete')
         }
       } else {
         // For backward compatibility.
@@ -39,21 +41,20 @@ if (typeof jQuery === 'undefined') {
         $.each(strategies, function (obj) {
           $.each(['header', 'footer', 'placement', 'maxCount'], function (name) {
             if (obj[name]) {
-              completer.option[name] = obj[name];
-              warn(name + 'as a strategy param is deprecated. Use option.');
-              delete obj[name];
+              completer.option[name] = obj[name]
+              warn(name + 'as a strategy param is deprecated. Use option.')
+              delete obj[name]
             }
-          });
-        });
-        completer.register($.fn.textcomplete.Strategy.parse(strategies));
+          })
+        })
+        completer.register($.fn.textcomplete.Strategy.parse(strategies))
       }
-    });
-  };
+    })
+  }
+})(jQuery)
 
-}(jQuery);
-
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
   // Exclusive execution control utility.
   //
@@ -78,20 +79,20 @@ if (typeof jQuery === 'undefined') {
   //
   // Returns a wrapped function.
   var lock = function (func) {
-    var locked, queuedArgsToReplay;
+    var locked, queuedArgsToReplay
 
     return function () {
       // Convert arguments into a real array.
-      var args = Array.prototype.slice.call(arguments);
+      var args = Array.prototype.slice.call(arguments)
       if (locked) {
         // Keep a copy of this argument list to replay later.
         // OK to overwrite a previous value because we only replay
         // the last one.
-        queuedArgsToReplay = args;
-        return;
+        queuedArgsToReplay = args
+        return
       }
-      locked = true;
-      var self = this;
+      locked = true
+      var self = this
       args.unshift(function replayOrFree() {
         if (queuedArgsToReplay) {
           // Other request(s) arrived while we were locked.
@@ -99,33 +100,38 @@ if (typeof jQuery === 'undefined') {
           // the latest such request, then call back here to
           // unlock (or replay another request that arrived
           // while this one was in flight).
-          var replayArgs = queuedArgsToReplay;
-          queuedArgsToReplay = undefined;
-          replayArgs.unshift(replayOrFree);
-          func.apply(self, replayArgs);
+          var replayArgs = queuedArgsToReplay
+          queuedArgsToReplay = undefined
+          replayArgs.unshift(replayOrFree)
+          func.apply(self, replayArgs)
         } else {
-          locked = false;
+          locked = false
         }
-      });
-      func.apply(this, args);
-    };
-  };
+      })
+      func.apply(this, args)
+    }
+  }
 
   var isString = function (obj) {
-    return Object.prototype.toString.call(obj) === '[object String]';
-  };
+    return Object.prototype.toString.call(obj) === '[object String]'
+  }
 
-  var uniqueId = 0;
+  var uniqueId = 0
 
   function Completer(element, option) {
-    this.$el        = $(element);
-    this.id         = 'textcomplete' + uniqueId++;
-    this.strategies = [];
-    this.views      = [];
-    this.option     = $.extend({}, Completer._getDefaults(), option);
+    this.$el = $(element)
+    this.id = 'textcomplete' + uniqueId++
+    this.strategies = []
+    this.views = []
+    this.option = $.extend({}, Completer._getDefaults(), option)
 
-    if (!this.$el.is('input[type=text]') && !this.$el.is('textarea') && !element.isContentEditable && element.contentEditable != 'true') {
-      throw new Error('textcomplete must be called on a Textarea or a ContentEditable.');
+    if (
+      !this.$el.is('input[type=text]') &&
+      !this.$el.is('textarea') &&
+      !element.isContentEditable &&
+      element.contentEditable != 'true'
+    ) {
+      throw new Error('textcomplete must be called on a Textarea or a ContentEditable.')
     }
 
     if (element === document.activeElement) {
@@ -133,8 +139,10 @@ if (typeof jQuery === 'undefined') {
       this.initialize()
     } else {
       // Initialize view objects lazily.
-      var self = this;
-      this.$el.one('focus.' + this.id, function () { self.initialize(); });
+      var self = this
+      this.$el.one('focus.' + this.id, function () {
+        self.initialize()
+      })
     }
   }
 
@@ -143,83 +151,87 @@ if (typeof jQuery === 'undefined') {
       Completer.DEFAULTS = {
         appendTo: $('body'),
         zIndex: '100'
-      };
+      }
     }
 
-    return Completer.DEFAULTS;
+    return Completer.DEFAULTS
   }
 
   $.extend(Completer.prototype, {
     // Public properties
     // -----------------
 
-    id:         null,
-    option:     null,
+    id: null,
+    option: null,
     strategies: null,
-    adapter:    null,
-    dropdown:   null,
-    $el:        null,
+    adapter: null,
+    dropdown: null,
+    $el: null,
 
     // Public methods
     // --------------
 
     initialize: function () {
-      var element = this.$el.get(0);
+      var element = this.$el.get(0)
       // Initialize view objects.
-      this.dropdown = new $.fn.textcomplete.Dropdown(element, this, this.option);
-      this.dropdown.upSideDown = false;
-      var Adapter, viewName;
+      this.dropdown = new $.fn.textcomplete.Dropdown(element, this, this.option)
+      this.dropdown.upSideDown = false
+      var Adapter, viewName
       if (this.option.adapter) {
-        Adapter = this.option.adapter;
+        Adapter = this.option.adapter
       } else {
         if (this.$el.is('textarea') || this.$el.is('input[type=text]')) {
-          viewName = typeof element.selectionEnd === 'number' ? 'Textarea' : 'IETextarea';
+          viewName = typeof element.selectionEnd === 'number' ? 'Textarea' : 'IETextarea'
         } else {
-          viewName = 'ContentEditable';
+          viewName = 'ContentEditable'
         }
-        Adapter = $.fn.textcomplete[viewName];
+        Adapter = $.fn.textcomplete[viewName]
       }
-      this.adapter = new Adapter(element, this, this.option);
+      this.adapter = new Adapter(element, this, this.option)
     },
 
     destroy: function () {
-      this.$el.off('.' + this.id);
+      this.$el.off('.' + this.id)
       if (this.adapter) {
-        this.adapter.destroy();
+        this.adapter.destroy()
       }
       if (this.dropdown) {
-        this.dropdown.destroy();
+        this.dropdown.destroy()
       }
-      this.$el = this.adapter = this.dropdown = null;
+      this.$el = this.adapter = this.dropdown = null
     },
 
     // Invoke textcomplete.
     trigger: function (text, skipUnchangedTerm) {
-      if (!this.dropdown) { this.initialize(); }
-      text != null || (text = this.adapter.getTextFromHeadToCaret());
-      var searchQuery = this._extractSearchQuery(text);
+      if (!this.dropdown) {
+        this.initialize()
+      }
+      text != null || (text = this.adapter.getTextFromHeadToCaret())
+      var searchQuery = this._extractSearchQuery(text)
       if (searchQuery.length) {
-        var term = searchQuery[1];
+        var term = searchQuery[1]
         // Ignore shift-key, ctrl-key and so on.
-        if (skipUnchangedTerm && this._term === term) { return; }
-        this._term = term;
-        this.fire('textComplete:beforeSearch');
-        this._search.apply(this, searchQuery);
-        this.fire('textComplete:afterSearch');
+        if (skipUnchangedTerm && this._term === term) {
+          return
+        }
+        this._term = term
+        this.fire('textComplete:beforeSearch')
+        this._search.apply(this, searchQuery)
+        this.fire('textComplete:afterSearch')
       } else {
-        this._term = null;
-        this.dropdown.deactivate();
+        this._term = null
+        this.dropdown.deactivate()
       }
     },
 
     fire: function (eventName) {
-      var args = Array.prototype.slice.call(arguments, 1);
-      this.$el.trigger(eventName, args);
-      return this;
+      var args = Array.prototype.slice.call(arguments, 1)
+      this.$el.trigger(eventName, args)
+      return this
     },
 
     register: function (strategies) {
-      Array.prototype.push.apply(this.strategies, strategies);
+      Array.prototype.push.apply(this.strategies, strategies)
     },
 
     // Insert the value into adapter view. It is called when the dropdown is clicked
@@ -228,16 +240,16 @@ if (typeof jQuery === 'undefined') {
     // value    - The selected element of the array callbacked from search func.
     // strategy - The Strategy object.
     select: function (value, strategy) {
-      this.adapter.select(value, strategy);
-      this.fire('change').fire('textComplete:select', value, strategy);
-      this.adapter.focus();
+      this.adapter.select(value, strategy)
+      this.fire('change').fire('textComplete:select', value, strategy)
+      this.adapter.focus()
     },
 
     // Private properties
     // ------------------
 
     _clearAtNext: true,
-    _term:        null,
+    _term: null,
 
     // Private methods
     // ---------------
@@ -248,18 +260,22 @@ if (typeof jQuery === 'undefined') {
     // object if the text matches an strategy; otherwise returns an empty array.
     _extractSearchQuery: function (text) {
       for (var i = 0; i < this.strategies.length; i++) {
-        var strategy = this.strategies[i];
-        var context = strategy.context(text);
+        var strategy = this.strategies[i]
+        var context = strategy.context(text)
         if (context || context === '') {
-          if (isString(context)) { text = context; }
-            var cursor = editor.getCursor();
-            var line = editor.getLine(cursor.line);
-            var linematch = line.match(strategy.match);
-            if(linematch) {
-                text = line.slice(0, cursor.ch);
-                var textmatch = text.match(strategy.match);
-                if (textmatch) { return [strategy, textmatch[strategy.index], textmatch]; }
+          if (isString(context)) {
+            text = context
+          }
+          var cursor = editor.getCursor()
+          var line = editor.getLine(cursor.line)
+          var linematch = line.match(strategy.match)
+          if (linematch) {
+            text = line.slice(0, cursor.ch)
+            var textmatch = text.match(strategy.match)
+            if (textmatch) {
+              return [strategy, textmatch[strategy.index], textmatch]
             }
+          }
         }
       }
       return []
@@ -267,24 +283,28 @@ if (typeof jQuery === 'undefined') {
 
     // Call the search method of selected strategy..
     _search: lock(function (free, strategy, term, match) {
-      var self = this;
-      strategy.search(term, function (data, stillSearching) {
-        if (!self.dropdown.shown) {
-          self.dropdown.activate();
-          self.dropdown.setPosition(self.adapter.getCaretPosition());
-        }
-        if (self._clearAtNext) {
-          // The first callback in the current lock.
-          self.dropdown.clear();
-          self._clearAtNext = false;
-        }
-        self.dropdown.render(self._zip(data, strategy));
-        if (!stillSearching) {
-          // The last callback in the current lock.
-          free();
-          self._clearAtNext = true; // Call dropdown.clear at the next time.
-        }
-      }, match);
+      var self = this
+      strategy.search(
+        term,
+        function (data, stillSearching) {
+          if (!self.dropdown.shown) {
+            self.dropdown.activate()
+            self.dropdown.setPosition(self.adapter.getCaretPosition())
+          }
+          if (self._clearAtNext) {
+            // The first callback in the current lock.
+            self.dropdown.clear()
+            self._clearAtNext = false
+          }
+          self.dropdown.render(self._zip(data, strategy))
+          if (!stillSearching) {
+            // The last callback in the current lock.
+            free()
+            self._clearAtNext = true // Call dropdown.clear at the next time.
+          }
+        },
+        match
+      )
     }),
 
     // Build a parameter for Dropdown#render.
@@ -295,34 +315,34 @@ if (typeof jQuery === 'undefined') {
     //  //=> [{ value: 'a', strategy: 's' }, { value: 'b', strategy: 's' }]
     _zip: function (data, strategy) {
       return $.map(data, function (value) {
-        return { value: value, strategy: strategy };
-      });
+        return { value: value, strategy: strategy }
+      })
     }
-  });
+  })
 
-  $.fn.textcomplete.Completer = Completer;
-}(jQuery);
+  $.fn.textcomplete.Completer = Completer
+})(jQuery)
 
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
   var include = function (zippedData, datum) {
-    var i, elem;
+    var i, elem
     var idProperty = datum.strategy.idProperty
     for (i = 0; i < zippedData.length; i++) {
-      elem = zippedData[i];
-      if (elem.strategy !== datum.strategy) continue;
+      elem = zippedData[i]
+      if (elem.strategy !== datum.strategy) continue
       if (idProperty) {
-        if (elem.value[idProperty] === datum.value[idProperty]) return true;
+        if (elem.value[idProperty] === datum.value[idProperty]) return true
       } else {
-        if (elem.value === datum.value) return true;
+        if (elem.value === datum.value) return true
       }
     }
-    return false;
-  };
+    return false
+  }
 
-  var dropdownViews = {};
-    /*
+  var dropdownViews = {}
+  /*
   $(document).on('mousedown', function (e) {
     var id = e.originalEvent && e.originalEvent.keepTextCompleteDropdown;
     $.each(dropdownViews, function (key, view) {
@@ -338,23 +358,29 @@ if (typeof jQuery === 'undefined') {
   //
   // element - Textarea or contenteditable element.
   function Dropdown(element, completer, option) {
-    this.$el       = Dropdown.findOrCreateElement(option);
-    this.completer = completer;
-    this.id        = completer.id + 'dropdown';
-    this._data     = []; // zipped data.
-    this.$inputEl  = $(element);
-    this.option    = option;
-    this.tap       = false;
+    this.$el = Dropdown.findOrCreateElement(option)
+    this.completer = completer
+    this.id = completer.id + 'dropdown'
+    this._data = [] // zipped data.
+    this.$inputEl = $(element)
+    this.option = option
+    this.tap = false
 
     // Override setPosition method.
-    if (option.listPosition) { this.setPosition = option.listPosition; }
-    if (option.height) { this.$el.height(option.height); }
-    var self = this;
+    if (option.listPosition) {
+      this.setPosition = option.listPosition
+    }
+    if (option.height) {
+      this.$el.height(option.height)
+    }
+    var self = this
     $.each(['maxCount', 'placement', 'footer', 'header', 'className'], function (_i, name) {
-      if (option[name] != null) { self[name] = option[name]; }
-    });
-    this._bindEvents(element);
-    dropdownViews[this.id] = this;
+      if (option[name] != null) {
+        self[name] = option[name]
+      }
+    })
+    this._bindEvents(element)
+    dropdownViews[this.id] = this
   }
 
   $.extend(Dropdown, {
@@ -362,35 +388,39 @@ if (typeof jQuery === 'undefined') {
     // -------------
 
     findOrCreateElement: function (option) {
-      var $parent = option.appendTo;
-      if (!($parent instanceof $)) { $parent = $($parent); }
+      var $parent = option.appendTo
+      if (!($parent instanceof $)) {
+        $parent = $($parent)
+      }
       var $el = $parent.children('.dropdown-menu')
       if (!$el.length) {
-        $el = $('<ul class="dropdown-menu"></ul>').css({
-          display: 'none',
-          left: 0,
-          position: 'absolute',
-          zIndex: option.zIndex
-        }).appendTo($parent);
+        $el = $('<ul class="dropdown-menu"></ul>')
+          .css({
+            display: 'none',
+            left: 0,
+            position: 'absolute',
+            zIndex: option.zIndex
+          })
+          .appendTo($parent)
       }
-      return $el;
+      return $el
     }
-  });
+  })
 
   $.extend(Dropdown.prototype, {
     // Public properties
     // -----------------
 
-    $el:       null,  // jQuery object of ul.dropdown-menu element.
-    $inputEl:  null,  // jQuery object of target textarea.
+    $el: null, // jQuery object of ul.dropdown-menu element.
+    $inputEl: null, // jQuery object of target textarea.
     completer: null,
-    footer:    null,
-    header:    null,
-    id:        null,
-    maxCount:  10,
+    footer: null,
+    header: null,
+    id: null,
+    maxCount: 10,
     placement: '',
-    shown:     false,
-    data:      [],     // Shown zipped data.
+    shown: false,
+    data: [], // Shown zipped data.
     className: '',
 
     // Public methods
@@ -398,110 +428,122 @@ if (typeof jQuery === 'undefined') {
 
     destroy: function () {
       // Don't remove $el because it may be shared by several textcompletes.
-      this.deactivate();
+      this.deactivate()
 
-      this.$el.off('.' + this.id);
-      this.$inputEl.off('.' + this.id);
-      this.clear();
-      this.$el = this.$inputEl = this.completer = null;
+      this.$el.off('.' + this.id)
+      this.$inputEl.off('.' + this.id)
+      this.clear()
+      this.$el = this.$inputEl = this.completer = null
       delete dropdownViews[this.id]
     },
 
     render: function (zippedData) {
-      var contentsHtml = this._buildContents(zippedData);
-      var unzippedData = $.map(this.data, function (d) { return d.value; });
+      var contentsHtml = this._buildContents(zippedData)
+      var unzippedData = $.map(this.data, function (d) {
+        return d.value
+      })
       if (this.data.length) {
-        this._renderHeader(unzippedData);
-        this._renderFooter(unzippedData);
+        this._renderHeader(unzippedData)
+        this._renderFooter(unzippedData)
         if (contentsHtml) {
-          this._renderContents(contentsHtml);
-          this._activateIndexedItem();
+          this._renderContents(contentsHtml)
+          this._activateIndexedItem()
         }
-        this._setScroll();
+        this._setScroll()
       } else if (this.shown) {
-        this.deactivate();
+        this.deactivate()
       }
     },
 
     setPosition: function (position) {
-      this.$el.css(this._applyPlacement(position));
+      this.$el.css(this._applyPlacement(position))
 
       // Make the dropdown fixed if the input is also fixed
       // This can't be done during init, as textcomplete may be used on multiple elements on the same page
       // Because the same dropdown is reused behind the scenes, we need to recheck every time the dropdown is showed
-      var position = 'absolute';
+      var position = 'absolute'
       // Check if input or one of its parents has positioning we need to care about
-      this.$inputEl.add(this.$inputEl.parents()).each(function() {
-        if($(this).css('position') === 'absolute') // The element has absolute positioning, so it's all OK
-          return false;
-        if($(this).css('position') === 'fixed') {
-          position = 'fixed';
-          return false;
+      this.$inputEl.add(this.$inputEl.parents()).each(function () {
+        if ($(this).css('position') === 'absolute')
+          // The element has absolute positioning, so it's all OK
+          return false
+        if ($(this).css('position') === 'fixed') {
+          position = 'fixed'
+          return false
         }
-      });
-      this.$el.css({ position: position }); // Update positioning
+      })
+      this.$el.css({ position: position }) // Update positioning
 
-      return this;
+      return this
     },
 
     clear: function () {
-      this.$el.html('');
-      this.data = [];
-      this._index = 0;
-      this._$header = this._$footer = null;
+      this.$el.html('')
+      this.data = []
+      this._index = 0
+      this._$header = this._$footer = null
     },
 
     activate: function () {
       if (!this.shown) {
-        this.clear();
-        this.$el.show();
-        if (this.className) { this.$el.addClass(this.className); }
-        this.completer.fire('textComplete:show');
-        this.shown = true;
+        this.clear()
+        this.$el.show()
+        if (this.className) {
+          this.$el.addClass(this.className)
+        }
+        this.completer.fire('textComplete:show')
+        this.shown = true
       }
-      return this;
+      return this
     },
 
     deactivate: function () {
       if (this.shown) {
-        this.$el.hide();
-        if (this.className) { this.$el.removeClass(this.className); }
-        this.completer.fire('textComplete:hide');
-        this.shown = false;
+        this.$el.hide()
+        if (this.className) {
+          this.$el.removeClass(this.className)
+        }
+        this.completer.fire('textComplete:hide')
+        this.shown = false
       }
-      return this;
+      return this
     },
 
     isUp: function (e) {
-      return e.keyCode === 38 || (e.ctrlKey && e.keyCode === 80);  // UP, Ctrl-P
+      return e.keyCode === 38 || (e.ctrlKey && e.keyCode === 80) // UP, Ctrl-P
     },
 
     isDown: function (e) {
-      return e.keyCode === 40 || (e.ctrlKey && e.keyCode === 78);  // DOWN, Ctrl-N
+      return e.keyCode === 40 || (e.ctrlKey && e.keyCode === 78) // DOWN, Ctrl-N
     },
 
     isEnter: function (e) {
-      var modifiers = e.ctrlKey || e.altKey || e.metaKey || e.shiftKey;
-      return !modifiers && (e.keyCode === 13 || e.keyCode === 9 || (this.option.completeOnSpace === true && e.keyCode === 32))  // ENTER, TAB
+      var modifiers = e.ctrlKey || e.altKey || e.metaKey || e.shiftKey
+      return (
+        !modifiers &&
+        (e.keyCode === 13 ||
+          e.keyCode === 9 ||
+          (this.option.completeOnSpace === true && e.keyCode === 32))
+      ) // ENTER, TAB
     },
 
     isPageup: function (e) {
-      return e.keyCode === 33;  // PAGEUP
+      return e.keyCode === 33 // PAGEUP
     },
 
     isPagedown: function (e) {
-      return e.keyCode === 34;  // PAGEDOWN
+      return e.keyCode === 34 // PAGEDOWN
     },
 
     isEscape: function (e) {
-      return e.keyCode === 27;  // ESCAPE
+      return e.keyCode === 27 // ESCAPE
     },
 
     // Private properties
     // ------------------
 
-    _data:    null,  // Currently shown zipped data.
-    _index:   null,
+    _data: null, // Currently shown zipped data.
+    _index: null,
     _$header: null,
     _$footer: null,
 
@@ -509,200 +551,222 @@ if (typeof jQuery === 'undefined') {
     // ---------------
 
     _bindEvents: function () {
-      this.$inputEl.on('blur', $.proxy(this.deactivate, this));
-      this.$el.on('touchstart.' + this.id, '.textcomplete-item', $.proxy(function(e) {
-          this.tap = true;
-      }, this));
-      this.$el.on('touchmove.' + this.id, '.textcomplete-item', $.proxy(function(e) {
-          this.tap = false;
-      }, this));
-      this.$el.on('touchend.' + this.id, '.textcomplete-item', $.proxy(function(e) {
-          if(e.cancelable && this.tap) {
-              this._onClick(e);
+      this.$inputEl.on('blur', $.proxy(this.deactivate, this))
+      this.$el.on(
+        'touchstart.' + this.id,
+        '.textcomplete-item',
+        $.proxy(function (e) {
+          this.tap = true
+        }, this)
+      )
+      this.$el.on(
+        'touchmove.' + this.id,
+        '.textcomplete-item',
+        $.proxy(function (e) {
+          this.tap = false
+        }, this)
+      )
+      this.$el.on(
+        'touchend.' + this.id,
+        '.textcomplete-item',
+        $.proxy(function (e) {
+          if (e.cancelable && this.tap) {
+            this._onClick(e)
           }
-      }, this));
-      this.$el.on('mousedown.' + this.id, '.textcomplete-item', $.proxy(this._onClick, this));
-      this.$el.on('mouseover.' + this.id, '.textcomplete-item', $.proxy(this._onMouseover, this));
-      this.$inputEl.on('keydown.' + this.id, $.proxy(this._onKeydown, this));
+        }, this)
+      )
+      this.$el.on(
+        'mousedown.' + this.id,
+        '.textcomplete-item',
+        $.proxy(this._onClick, this)
+      )
+      this.$el.on(
+        'mouseover.' + this.id,
+        '.textcomplete-item',
+        $.proxy(this._onMouseover, this)
+      )
+      this.$inputEl.on('keydown.' + this.id, $.proxy(this._onKeydown, this))
     },
 
     _onClick: function (e) {
-      var $el = $(e.target);
-      e.stopPropagation();
-      e.preventDefault();
-      e.originalEvent.keepTextCompleteDropdown = this.id;
+      var $el = $(e.target)
+      e.stopPropagation()
+      e.preventDefault()
+      e.originalEvent.keepTextCompleteDropdown = this.id
       if (!$el.hasClass('textcomplete-item')) {
-        $el = $el.closest('.textcomplete-item');
+        $el = $el.closest('.textcomplete-item')
       }
-      var datum = this.data[parseInt($el.data('index'), 10)];
-      this.completer.select(datum.value, datum.strategy);
-      var self = this;
+      var datum = this.data[parseInt($el.data('index'), 10)]
+      this.completer.select(datum.value, datum.strategy)
+      var self = this
       // Deactive at next tick to allow other event handlers to know whether
       // the dropdown has been shown or not.
-      setTimeout(function () { self.deactivate(); }, 0);
+      setTimeout(function () {
+        self.deactivate()
+      }, 0)
     },
 
     // Activate hovered item.
     _onMouseover: function (e) {
-      var $el = $(e.target);
-      e.preventDefault();
+      var $el = $(e.target)
+      e.preventDefault()
       if (!$el.hasClass('textcomplete-item')) {
-        $el = $el.closest('.textcomplete-item');
+        $el = $el.closest('.textcomplete-item')
       }
-      this._index = parseInt($el.data('index'), 10);
-      this._activateIndexedItem();
+      this._index = parseInt($el.data('index'), 10)
+      this._activateIndexedItem()
     },
 
     _onKeydown: function (e) {
-      if (!this.shown) { return; }
+      if (!this.shown) {
+        return
+      }
       if (this.isUp(e)) {
-        e.preventDefault();
-        if(this.upSideDown)
-          this._down();
-        else
-          this._up();
+        e.preventDefault()
+        if (this.upSideDown) this._down()
+        else this._up()
       } else if (this.isDown(e)) {
-        e.preventDefault();
-        if(this.upSideDown)
-          this._up();
-        else
-          this._down();
+        e.preventDefault()
+        if (this.upSideDown) this._up()
+        else this._down()
       } else if (this.isEnter(e)) {
-        e.preventDefault();
-        this._enter();
+        e.preventDefault()
+        this._enter()
       } else if (this.isPageup(e)) {
-        e.preventDefault();
-        this._pageup();
+        e.preventDefault()
+        this._pageup()
       } else if (this.isPagedown(e)) {
-        e.preventDefault();
-        this._pagedown();
+        e.preventDefault()
+        this._pagedown()
       } else if (this.isEscape(e)) {
-        e.preventDefault();
-        this.deactivate();
+        e.preventDefault()
+        this.deactivate()
       }
     },
 
     _up: function () {
       if (this._index === 0) {
-        this._index = this.data.length - 1;
+        this._index = this.data.length - 1
       } else {
-        this._index -= 1;
+        this._index -= 1
       }
-      this._activateIndexedItem();
-      this._setScroll();
+      this._activateIndexedItem()
+      this._setScroll()
     },
 
     _down: function () {
       if (this._index === this.data.length - 1) {
-        this._index = 0;
+        this._index = 0
       } else {
-        this._index += 1;
+        this._index += 1
       }
-      this._activateIndexedItem();
-      this._setScroll();
+      this._activateIndexedItem()
+      this._setScroll()
     },
 
     _enter: function () {
-      var datum = this.data[parseInt(this._getActiveElement().data('index'), 10)];
-      this.completer.select(datum.value, datum.strategy);
-      this.deactivate();
+      var datum = this.data[parseInt(this._getActiveElement().data('index'), 10)]
+      this.completer.select(datum.value, datum.strategy)
+      this.deactivate()
     },
 
     _pageup: function () {
-      var target = 0;
-      var threshold = this._getActiveElement().position().top - this.$el.innerHeight();
+      var target = 0
+      var threshold = this._getActiveElement().position().top - this.$el.innerHeight()
       this.$el.children().each(function (i) {
         if ($(this).position().top + $(this).outerHeight() > threshold) {
-          target = i;
-          return false;
+          target = i
+          return false
         }
-      });
-      this._index = target;
-      this._activateIndexedItem();
-      this._setScroll();
+      })
+      this._index = target
+      this._activateIndexedItem()
+      this._setScroll()
     },
 
     _pagedown: function () {
-      var target = this.data.length - 1;
-      var threshold = this._getActiveElement().position().top + this.$el.innerHeight();
+      var target = this.data.length - 1
+      var threshold = this._getActiveElement().position().top + this.$el.innerHeight()
       this.$el.children().each(function (i) {
         if ($(this).position().top > threshold) {
-          target = i;
+          target = i
           return false
         }
-      });
-      this._index = target;
-      this._activateIndexedItem();
-      this._setScroll();
+      })
+      this._index = target
+      this._activateIndexedItem()
+      this._setScroll()
     },
 
     _activateIndexedItem: function () {
-      this.$el.find('.textcomplete-item.active').removeClass('active');
-      this._getActiveElement().addClass('active');
+      this.$el.find('.textcomplete-item.active').removeClass('active')
+      this._getActiveElement().addClass('active')
     },
 
     _getActiveElement: function () {
-      return this.$el.children('.textcomplete-item[data-index=' + this._index + ']');
+      return this.$el.children('.textcomplete-item[data-index=' + this._index + ']')
     },
 
     _setScroll: function () {
-      var $activeEl = this._getActiveElement();
-      var itemTop = $activeEl.position().top;
-      var itemHeight = $activeEl.outerHeight();
-      var visibleHeight = this.$el.innerHeight();
-      var visibleTop = this.$el.scrollTop();
+      var $activeEl = this._getActiveElement()
+      var itemTop = $activeEl.position().top
+      var itemHeight = $activeEl.outerHeight()
+      var visibleHeight = this.$el.innerHeight()
+      var visibleTop = this.$el.scrollTop()
       if (this._index === 0 || this._index == this.data.length - 1 || itemTop < 0) {
-        this.$el.scrollTop(itemTop + visibleTop);
+        this.$el.scrollTop(itemTop + visibleTop)
       } else if (itemTop + itemHeight > visibleHeight) {
-        this.$el.scrollTop(itemTop + itemHeight + visibleTop - visibleHeight);
+        this.$el.scrollTop(itemTop + itemHeight + visibleTop - visibleHeight)
       }
     },
 
     _buildContents: function (zippedData) {
-      var datum, i, index;
-      var item = [];
-      var html = '';
-          for (i = 0; i < zippedData.length; i++) {
-            if (this.data.length === this.maxCount) break;
-            datum = zippedData[i];
-            if (include(this.data, datum)) { continue; }
-            index = this.data.length;
-            this.data.push(datum);
-            item.push(datum.strategy.template(datum.value));
-          }
-          for (i = 0; i < item.length; i++) {
-                html += '<li class="textcomplete-item" data-index="' + i + '"><a>';
-            html += item[i];
-            html += '</a></li>';
-          }
-      return html;
+      var datum, i, index
+      var item = []
+      var html = ''
+      for (i = 0; i < zippedData.length; i++) {
+        if (this.data.length === this.maxCount) break
+        datum = zippedData[i]
+        if (include(this.data, datum)) {
+          continue
+        }
+        index = this.data.length
+        this.data.push(datum)
+        item.push(datum.strategy.template(datum.value))
+      }
+      for (i = 0; i < item.length; i++) {
+        html += '<li class="textcomplete-item" data-index="' + i + '"><a>'
+        html += item[i]
+        html += '</a></li>'
+      }
+      return html
     },
 
     _renderHeader: function (unzippedData) {
       if (this.header) {
         if (!this._$header) {
-          this._$header = $('<li class="textcomplete-header"></li>').prependTo(this.$el);
+          this._$header = $('<li class="textcomplete-header"></li>').prependTo(this.$el)
         }
-        var html = $.isFunction(this.header) ? this.header(unzippedData) : this.header;
-        this._$header.html(html);
+        var html = $.isFunction(this.header) ? this.header(unzippedData) : this.header
+        this._$header.html(html)
       }
     },
 
     _renderFooter: function (unzippedData) {
       if (this.footer) {
         if (!this._$footer) {
-          this._$footer = $('<li class="textcomplete-footer"></li>').appendTo(this.$el);
+          this._$footer = $('<li class="textcomplete-footer"></li>').appendTo(this.$el)
         }
-        var html = $.isFunction(this.footer) ? this.footer(unzippedData) : this.footer;
-        this._$footer.html(html);
+        var html = $.isFunction(this.footer) ? this.footer(unzippedData) : this.footer
+        this._$footer.html(html)
       }
     },
 
     _renderContents: function (html) {
       if (this._$footer) {
-        this._$footer.before(html);
+        this._$footer.before(html)
       } else {
-        this.$el.append(html);
+        this.$el.append(html)
       }
     },
 
@@ -714,78 +778,87 @@ if (typeof jQuery === 'undefined') {
           top: 'auto',
           bottom: this.$el.parent().height() - position.top + position.lineHeight,
           left: position.left
-        };
+        }
       } else {
-        position.bottom = 'auto';
-        delete position.lineHeight;
+        position.bottom = 'auto'
+        delete position.lineHeight
       }
       if (this.placement.indexOf('absleft') !== -1) {
-        position.left = 0;
+        position.left = 0
       } else if (this.placement.indexOf('absright') !== -1) {
-        position.right = 0;
-        position.left = 'auto';
+        position.right = 0
+        position.left = 'auto'
       }
-      return position;
+      return position
     }
-  });
+  })
 
-  $.fn.textcomplete.Dropdown = Dropdown;
-}(jQuery);
+  $.fn.textcomplete.Dropdown = Dropdown
+})(jQuery)
 
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
   // Memoize a search function.
   var memoize = function (func) {
-    var memo = {};
+    var memo = {}
     return function (term, callback) {
       if (memo[term]) {
-        callback(memo[term]);
+        callback(memo[term])
       } else {
         func.call(this, term, function (data) {
-          memo[term] = (memo[term] || []).concat(data);
-          callback.apply(null, arguments);
-        });
+          memo[term] = (memo[term] || []).concat(data)
+          callback.apply(null, arguments)
+        })
       }
-    };
-  };
+    }
+  }
 
   function Strategy(options) {
-    $.extend(this, options);
-    if (this.cache) { this.search = memoize(this.search); }
+    $.extend(this, options)
+    if (this.cache) {
+      this.search = memoize(this.search)
+    }
   }
 
   Strategy.parse = function (optionsArray) {
     return $.map(optionsArray, function (options) {
-      return new Strategy(options);
-    });
-  };
+      return new Strategy(options)
+    })
+  }
 
   $.extend(Strategy.prototype, {
     // Public properties
     // -----------------
 
     // Required
-    match:      null,
-    replace:    null,
-    search:     null,
+    match: null,
+    replace: null,
+    search: null,
 
     // Optional
-    cache:      false,
-    context:    function () { return true; },
-    index:      2,
-    template:   function (obj) { return obj; },
+    cache: false,
+    context: function () {
+      return true
+    },
+    index: 2,
+    template: function (obj) {
+      return obj
+    },
     idProperty: null
-  });
+  })
 
-  $.fn.textcomplete.Strategy = Strategy;
+  $.fn.textcomplete.Strategy = Strategy
+})(jQuery)
 
-}(jQuery);
+;+(function ($) {
+  'use strict'
 
-+function ($) {
-  'use strict';
-
-  var now = Date.now || function () { return new Date().getTime(); };
+  var now =
+    Date.now ||
+    function () {
+      return new Date().getTime()
+    }
 
   // Returns a function, that, as long as it continues to be invoked, will not
   // be triggered. The function will be called after it stops being called for
@@ -793,62 +866,62 @@ if (typeof jQuery === 'undefined') {
   //
   // This utility function was originally implemented at Underscore.js.
   var debounce = function (func, wait) {
-    var timeout, args, context, timestamp, result;
+    var timeout, args, context, timestamp, result
     var later = function () {
-      var last = now() - timestamp;
+      var last = now() - timestamp
       if (last < wait) {
-        timeout = setTimeout(later, wait - last);
+        timeout = setTimeout(later, wait - last)
       } else {
-        timeout = null;
-        result = func.apply(context, args);
-        context = args = null;
+        timeout = null
+        result = func.apply(context, args)
+        context = args = null
       }
-    };
+    }
 
     return function () {
-      context = this;
-      args = arguments;
-      timestamp = now();
+      context = this
+      args = arguments
+      timestamp = now()
       if (!timeout) {
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(later, wait)
       }
-      return result;
-    };
-  };
+      return result
+    }
+  }
 
-  function Adapter () {}
+  function Adapter() {}
 
   $.extend(Adapter.prototype, {
     // Public properties
     // -----------------
 
-    id:        null, // Identity.
+    id: null, // Identity.
     completer: null, // Completer object which creates it.
-    el:        null, // Textarea element.
-    $el:       null, // jQuery object of the textarea.
-    option:    null,
+    el: null, // Textarea element.
+    $el: null, // jQuery object of the textarea.
+    option: null,
 
     // Public methods
     // --------------
 
     initialize: function (element, completer, option) {
-      this.el        = element;
-      this.$el       = $(element);
-      this.id        = completer.id + this.constructor.name;
-      this.completer = completer;
-      this.option    = option;
-      this.lastCurosr = null;
+      this.el = element
+      this.$el = $(element)
+      this.id = completer.id + this.constructor.name
+      this.completer = completer
+      this.option = option
+      this.lastCurosr = null
 
       if (this.option.debounce) {
-        this._onKeyup = debounce(this._onKeyup, this.option.debounce);
+        this._onKeyup = debounce(this._onKeyup, this.option.debounce)
       }
 
-      this._bindEvents();
+      this._bindEvents()
     },
 
     destroy: function () {
-      this.$el.off('.' + this.id); // Remove all event handlers.
-      this.$el = this.el = this.completer = null;
+      this.$el.off('.' + this.id) // Remove all event handlers.
+      this.$el = this.el = this.completer = null
     },
 
     // Update the element with the given value and strategy.
@@ -857,7 +930,7 @@ if (typeof jQuery === 'undefined') {
     //            which was callbacked from the search function.
     // strategy - The Strategy associated with the selected value.
     select: function (/* value, strategy */) {
-      throw new Error('Not implemented');
+      throw new Error('Not implemented')
     },
 
     // Returns the caret's relative coordinates from body's left top corner.
@@ -865,55 +938,59 @@ if (typeof jQuery === 'undefined') {
     // FIXME: Calculate the left top corner of `this.option.appendTo` element.
     getCaretPosition: function () {
       if ($('.CodeMirror-cursor').length > 0) {
-        var position = $('.CodeMirror-cursor').position();
-        var menu = $('.cursor-menu .dropdown-menu');
-        var offsetLeft = parseFloat(menu.attr('data-offset-left'));
-        var offsetTop = parseFloat(menu.attr('data-offset-top'));
-        position.left += offsetLeft;
-        position.top += offsetTop;
-        return position;
+        var position = $('.CodeMirror-cursor').position()
+        var menu = $('.cursor-menu .dropdown-menu')
+        var offsetLeft = parseFloat(menu.attr('data-offset-left'))
+        var offsetTop = parseFloat(menu.attr('data-offset-top'))
+        position.left += offsetLeft
+        position.top += offsetTop
+        return position
       } else {
-        var position = this._getCaretRelativePosition();
-        var offset = this.$el.offset();
+        var position = this._getCaretRelativePosition()
+        var offset = this.$el.offset()
 
         // Calculate the left top corner of `this.option.appendTo` element.
-        var $parent = this.option.appendTo;
+        var $parent = this.option.appendTo
         if ($parent) {
-          if (!($parent instanceof $)) { $parent = $($parent); }
-          var parentOffset = $parent.offsetParent().offset();
-          offset.top -= parentOffset.top;
-          offset.left -= parentOffset.left;
+          if (!($parent instanceof $)) {
+            $parent = $($parent)
+          }
+          var parentOffset = $parent.offsetParent().offset()
+          offset.top -= parentOffset.top
+          offset.left -= parentOffset.left
         }
 
-        position.top += offset.top;
-        position.left += offset.left;
-        return position;
+        position.top += offset.top
+        position.left += offset.left
+        return position
       }
     },
 
     // Focus on the element.
     focus: function () {
-      this.$el.focus();
+      this.$el.focus()
     },
 
     // Private methods
     // ---------------
 
     _bindEvents: function () {
-      editor.on('cursorActivity', $.proxy(this._onKeyup, this));
-      $('.CodeMirror').on('touchend.' + this.id, $.proxy(this._onKeyup, this));
-      $('.CodeMirror').on('mouseup.' + this.id, $.proxy(this._onKeyup, this));
-      $(editor.getInputField()).on('focus', $.proxy(this._onKeyup, this));
-      this.$el.on('keyup.' + this.id, $.proxy(this._onKeyup, this));
+      editor.on('cursorActivity', $.proxy(this._onKeyup, this))
+      $('.CodeMirror').on('touchend.' + this.id, $.proxy(this._onKeyup, this))
+      $('.CodeMirror').on('mouseup.' + this.id, $.proxy(this._onKeyup, this))
+      $(editor.getInputField()).on('focus', $.proxy(this._onKeyup, this))
+      this.$el.on('keyup.' + this.id, $.proxy(this._onKeyup, this))
     },
 
     _onKeyup: function (e) {
-      var focus = (e.type == 'focus');
-      var cursor = editor.getCursor();
-      var samePos = (cursor == this.lastCursor);
-      if (this._skipSearch(e)) { return; }
-      this.completer.trigger(this.getTextFromHeadToCaret(), focus ? false : samePos);
-      this.lastCursor = cursor;
+      var focus = e.type == 'focus'
+      var cursor = editor.getCursor()
+      var samePos = cursor == this.lastCursor
+      if (this._skipSearch(e)) {
+        return
+      }
+      this.completer.trigger(this.getTextFromHeadToCaret(), focus ? false : samePos)
+      this.lastCursor = cursor
     },
 
     // Suppress searching if it returns true.
@@ -922,28 +999,29 @@ if (typeof jQuery === 'undefined') {
         case 13: // ENTER
         case 40: // DOWN
         case 38: // UP
-          return true;
+          return true
       }
-      if (clickEvent.ctrlKey) switch (clickEvent.keyCode) {
-        case 78: // Ctrl-N
-        case 80: // Ctrl-P
-          return true;
-      }
+      if (clickEvent.ctrlKey)
+        switch (clickEvent.keyCode) {
+          case 78: // Ctrl-N
+          case 80: // Ctrl-P
+            return true
+        }
     }
-  });
+  })
 
-  $.fn.textcomplete.Adapter = Adapter;
-}(jQuery);
+  $.fn.textcomplete.Adapter = Adapter
+})(jQuery)
 
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
   // Textarea adapter
   // ================
   //
   // Managing a textarea. It doesn't know a Dropdown.
   function Textarea(element, completer, option) {
-    this.initialize(element, completer, option);
+    this.initialize(element, completer, option)
   }
 
   Textarea.DIV_PROPERTIES = {
@@ -954,12 +1032,31 @@ if (typeof jQuery === 'undefined') {
   }
 
   Textarea.COPY_PROPERTIES = [
-    'border-width', 'font-family', 'font-size', 'font-style', 'font-variant',
-    'font-weight', 'height', 'letter-spacing', 'word-spacing', 'line-height',
-    'text-decoration', 'text-align', 'width', 'padding-top', 'padding-right',
-    'padding-bottom', 'padding-left', 'margin-top', 'margin-right',
-    'margin-bottom', 'margin-left', 'border-style', 'box-sizing', 'tab-size'
-  ];
+    'border-width',
+    'font-family',
+    'font-size',
+    'font-style',
+    'font-variant',
+    'font-weight',
+    'height',
+    'letter-spacing',
+    'word-spacing',
+    'line-height',
+    'text-decoration',
+    'text-align',
+    'width',
+    'padding-top',
+    'padding-right',
+    'padding-bottom',
+    'padding-left',
+    'margin-top',
+    'margin-right',
+    'margin-bottom',
+    'margin-left',
+    'border-style',
+    'box-sizing',
+    'tab-size'
+  ]
 
   $.extend(Textarea.prototype, $.fn.textcomplete.Adapter.prototype, {
     // Public methods
@@ -967,7 +1064,7 @@ if (typeof jQuery === 'undefined') {
 
     // Update the textarea with the given value and strategy.
     select: function (value, strategy) {
-        /*
+      /*
       var pre = this.getTextFromHeadToCaret();
       var post = this.el.value.substring(this.el.selectionEnd);
       var newSubstr = strategy.replace(value);
@@ -979,33 +1076,32 @@ if (typeof jQuery === 'undefined') {
       this.$el.val(pre + post);
       this.el.selectionStart = this.el.selectionEnd = pre.length;
       */
-        var cursor = editor.getCursor();
-        var pre = editor.getLine(cursor.line).slice(0, cursor.ch);
-        var match = pre.match(strategy.match);
-        if (!match) return;
-        pre = match[0];
-        var newSubstr = strategy.replace(value);
-        newSubstr = pre.replace(strategy.match, newSubstr);
-        
-        editor.operation(function() {
-          var selections = editor.listSelections();
-          var bias = match.index - cursor.ch;
-          for (var i = 0, l = selections.length; i < l; i++) {
-            var sel = selections[i];
-            var start = {
-              line: sel.head.line,
-              ch: sel.head.ch + bias
-            };
-            var end = {
-              line: sel.head.line,
-              ch: sel.head.ch + bias + match[0].length
-            };
-            editor.replaceRange(newSubstr, start, end, "+input");
+      var cursor = editor.getCursor()
+      var pre = editor.getLine(cursor.line).slice(0, cursor.ch)
+      var match = pre.match(strategy.match)
+      if (!match) return
+      pre = match[0]
+      var newSubstr = strategy.replace(value)
+      newSubstr = pre.replace(strategy.match, newSubstr)
+
+      editor.operation(function () {
+        var selections = editor.listSelections()
+        var bias = match.index - cursor.ch
+        for (var i = 0, l = selections.length; i < l; i++) {
+          var sel = selections[i]
+          var start = {
+            line: sel.head.line,
+            ch: sel.head.ch + bias
           }
-        });
-        
-        if(strategy.done)
-            strategy.done();
+          var end = {
+            line: sel.head.line,
+            ch: sel.head.ch + bias + match[0].length
+          }
+          editor.replaceRange(newSubstr, start, end, '+input')
+        }
+      })
+
+      if (strategy.done) strategy.done()
     },
 
     // Private methods
@@ -1020,62 +1116,70 @@ if (typeof jQuery === 'undefined') {
     // span element into the textarea.
     // Consequently, the span element's position is the thing what we want.
     _getCaretRelativePosition: function () {
-      var dummyDiv = $('<div></div>').css(this._copyCss())
-        .text(this.getTextFromHeadToCaret());
-      var span = $('<span></span>').text('.').appendTo(dummyDiv);
-      this.$el.before(dummyDiv);
-      var position = span.position();
-      position.top += span.height() - this.$el.scrollTop();
-      position.lineHeight = span.height();
-      dummyDiv.remove();
-      return position;
+      var dummyDiv = $('<div></div>')
+        .css(this._copyCss())
+        .text(this.getTextFromHeadToCaret())
+      var span = $('<span></span>').text('.').appendTo(dummyDiv)
+      this.$el.before(dummyDiv)
+      var position = span.position()
+      position.top += span.height() - this.$el.scrollTop()
+      position.lineHeight = span.height()
+      dummyDiv.remove()
+      return position
     },
 
     _copyCss: function () {
-      return $.extend({
-        // Set 'scroll' if a scrollbar is being shown; otherwise 'auto'.
-        overflow: this.el.scrollHeight > this.el.offsetHeight ? 'scroll' : 'auto'
-      }, Textarea.DIV_PROPERTIES, this._getStyles());
+      return $.extend(
+        {
+          // Set 'scroll' if a scrollbar is being shown; otherwise 'auto'.
+          overflow: this.el.scrollHeight > this.el.offsetHeight ? 'scroll' : 'auto'
+        },
+        Textarea.DIV_PROPERTIES,
+        this._getStyles()
+      )
     },
 
     _getStyles: (function ($) {
-      var color = $('<div></div>').css(['color']).color;
+      var color = $('<div></div>').css(['color']).color
       if (typeof color !== 'undefined') {
         return function () {
-          return this.$el.css(Textarea.COPY_PROPERTIES);
-        };
-      } else { // jQuery < 1.8
+          return this.$el.css(Textarea.COPY_PROPERTIES)
+        }
+      } else {
+        // jQuery < 1.8
         return function () {
-          var $el = this.$el;
-          var styles = {};
+          var $el = this.$el
+          var styles = {}
           $.each(Textarea.COPY_PROPERTIES, function (i, property) {
-            styles[property] = $el.css(property);
-          });
-          return styles;
-        };
+            styles[property] = $el.css(property)
+          })
+          return styles
+        }
       }
     })($),
 
     getTextFromHeadToCaret: function () {
-      return this.el.value.substring(0, this.el.selectionEnd);
+      return this.el.value.substring(0, this.el.selectionEnd)
     }
-  });
+  })
 
-  $.fn.textcomplete.Textarea = Textarea;
-}(jQuery);
+  $.fn.textcomplete.Textarea = Textarea
+})(jQuery)
 
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
-  var sentinelChar = '吶';
+  var sentinelChar = '吶'
 
   function IETextarea(element, completer, option) {
-    this.initialize(element, completer, option);
-    $('<span>' + sentinelChar + '</span>').css({
-      position: 'absolute',
-      top: -9999,
-      left: -9999
-    }).insertBefore(element);
+    this.initialize(element, completer, option)
+    $('<span>' + sentinelChar + '</span>')
+      .css({
+        position: 'absolute',
+        top: -9999,
+        left: -9999
+      })
+      .insertBefore(element)
   }
 
   $.extend(IETextarea.prototype, $.fn.textcomplete.Textarea.prototype, {
@@ -1083,48 +1187,48 @@ if (typeof jQuery === 'undefined') {
     // --------------
 
     select: function (value, strategy) {
-      var pre = this.getTextFromHeadToCaret();
-      var post = this.el.value.substring(pre.length);
-      var newSubstr = strategy.replace(value);
+      var pre = this.getTextFromHeadToCaret()
+      var post = this.el.value.substring(pre.length)
+      var newSubstr = strategy.replace(value)
       if ($.isArray(newSubstr)) {
-        post = newSubstr[1] + post;
-        newSubstr = newSubstr[0];
+        post = newSubstr[1] + post
+        newSubstr = newSubstr[0]
       }
-      pre = pre.replace(strategy.match, newSubstr);
-      this.$el.val(pre + post);
-      this.el.focus();
-      var range = this.el.createTextRange();
-      range.collapse(true);
-      range.moveEnd('character', pre.length);
-      range.moveStart('character', pre.length);
-      range.select();
+      pre = pre.replace(strategy.match, newSubstr)
+      this.$el.val(pre + post)
+      this.el.focus()
+      var range = this.el.createTextRange()
+      range.collapse(true)
+      range.moveEnd('character', pre.length)
+      range.moveStart('character', pre.length)
+      range.select()
     },
 
     getTextFromHeadToCaret: function () {
-      this.el.focus();
-      var range = document.selection.createRange();
-      range.moveStart('character', -this.el.value.length);
+      this.el.focus()
+      var range = document.selection.createRange()
+      range.moveStart('character', -this.el.value.length)
       var arr = range.text.split(sentinelChar)
-      return arr.length === 1 ? arr[0] : arr[1];
+      return arr.length === 1 ? arr[0] : arr[1]
     }
-  });
+  })
 
-  $.fn.textcomplete.IETextarea = IETextarea;
-}(jQuery);
+  $.fn.textcomplete.IETextarea = IETextarea
+})(jQuery)
 
 // NOTE: TextComplete plugin has contenteditable support but it does not work
 //       fine especially on old IEs.
 //       Any pull requests are REALLY welcome.
 
-+function ($) {
-  'use strict';
+;+(function ($) {
+  'use strict'
 
   // ContentEditable adapter
   // =======================
   //
   // Adapter for contenteditable elements.
-  function ContentEditable (element, completer, option) {
-    this.initialize(element, completer, option);
+  function ContentEditable(element, completer, option) {
+    this.initialize(element, completer, option)
   }
 
   $.extend(ContentEditable.prototype, $.fn.textcomplete.Adapter.prototype, {
@@ -1134,27 +1238,27 @@ if (typeof jQuery === 'undefined') {
     // Update the content with the given value and strategy.
     // When an dropdown item is selected, it is executed.
     select: function (value, strategy) {
-      var pre = this.getTextFromHeadToCaret();
+      var pre = this.getTextFromHeadToCaret()
       var sel = window.getSelection()
-      var range = sel.getRangeAt(0);
-      var selection = range.cloneRange();
-      selection.selectNodeContents(range.startContainer);
-      var content = selection.toString();
-      var post = content.substring(range.startOffset);
-      var newSubstr = strategy.replace(value);
+      var range = sel.getRangeAt(0)
+      var selection = range.cloneRange()
+      selection.selectNodeContents(range.startContainer)
+      var content = selection.toString()
+      var post = content.substring(range.startOffset)
+      var newSubstr = strategy.replace(value)
       if ($.isArray(newSubstr)) {
-        post = newSubstr[1] + post;
-        newSubstr = newSubstr[0];
+        post = newSubstr[1] + post
+        newSubstr = newSubstr[0]
       }
-      pre = pre.replace(strategy.match, newSubstr);
-      range.selectNodeContents(range.startContainer);
-      range.deleteContents();
-      var node = document.createTextNode(pre + post);
-      range.insertNode(node);
-      range.setStart(node, pre.length);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
+      pre = pre.replace(strategy.match, newSubstr)
+      range.selectNodeContents(range.startContainer)
+      range.deleteContents()
+      var node = document.createTextNode(pre + post)
+      range.insertNode(node)
+      range.setStart(node, pre.length)
+      range.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(range)
     },
 
     // Private methods
@@ -1170,20 +1274,22 @@ if (typeof jQuery === 'undefined') {
     //
     // Dropdown's position will be decided using the result.
     _getCaretRelativePosition: function () {
-      var range = window.getSelection().getRangeAt(0).cloneRange();
-      var node = document.createElement('span');
-      range.insertNode(node);
-      range.selectNodeContents(node);
-      range.deleteContents();
-      var $node = $(node);
-      var position = $node.offset();
-      position.left -= this.$el.offset().left;
-      position.top += $node.height() - this.$el.offset().top;
-      position.lineHeight = $node.height();
-      $node.remove();
-      var dir = this.$el.attr('dir') || this.$el.css('direction');
-      if (dir === 'rtl') { position.left -= this.listView.$el.width(); }
-      return position;
+      var range = window.getSelection().getRangeAt(0).cloneRange()
+      var node = document.createElement('span')
+      range.insertNode(node)
+      range.selectNodeContents(node)
+      range.deleteContents()
+      var $node = $(node)
+      var position = $node.offset()
+      position.left -= this.$el.offset().left
+      position.top += $node.height() - this.$el.offset().top
+      position.lineHeight = $node.height()
+      $node.remove()
+      var dir = this.$el.attr('dir') || this.$el.css('direction')
+      if (dir === 'rtl') {
+        position.left -= this.listView.$el.width()
+      }
+      return position
     },
 
     // Returns the string between the first character and the caret.
@@ -1195,12 +1301,12 @@ if (typeof jQuery === 'undefined') {
     //   this.getTextFromHeadToCaret()
     //   // => ' wor'  // not '<b>hello</b> wor'
     getTextFromHeadToCaret: function () {
-      var range = window.getSelection().getRangeAt(0);
-      var selection = range.cloneRange();
-      selection.selectNodeContents(range.startContainer);
-      return selection.toString().substring(0, range.startOffset);
+      var range = window.getSelection().getRangeAt(0)
+      var selection = range.cloneRange()
+      selection.selectNodeContents(range.startContainer)
+      return selection.toString().substring(0, range.startOffset)
     }
-  });
+  })
 
-  $.fn.textcomplete.ContentEditable = ContentEditable;
-}(jQuery);
+  $.fn.textcomplete.ContentEditable = ContentEditable
+})(jQuery)

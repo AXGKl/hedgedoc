@@ -21,7 +21,7 @@ $(document).ready(() => {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
-function extend () {
+function extend() {
   const target = {}
 
   for (const source of arguments) {
@@ -39,14 +39,14 @@ function extend () {
 const deps = [
   {
     src: `${serverurl}/build/reveal.js/lib/js/classList.js`,
-    condition () {
+    condition() {
       return !document.body.classList
     }
   },
   {
     src: `${serverurl}/build/reveal.js/plugin/notes/notes.js`,
     async: true,
-    condition () {
+    condition() {
       return !!document.body.classList
     }
   }
@@ -130,10 +130,7 @@ let options =
   } || {}
 
 for (const key in options) {
-  if (
-    Object.prototype.hasOwnProperty.call(options, key) &&
-    options[key] === undefined
-  ) {
+  if (Object.prototype.hasOwnProperty.call(options, key) && options[key] === undefined) {
     delete options[key]
   }
 }
@@ -169,7 +166,7 @@ window.viewAjaxCallback = () => {
   Reveal.layout()
 }
 
-function renderSlide (event) {
+function renderSlide(event) {
   if (window.location.search.match(/print-pdf/gi)) {
     const slides = $('.slides')
     const title = document.title

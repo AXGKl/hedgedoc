@@ -56,9 +56,11 @@ const options = {
           </a>
         </li>`,
   page: 18,
-  pagination: [{
-    outerWindow: 1
-  }]
+  pagination: [
+    {
+      outerWindow: 1
+    }
+  ]
 }
 const historyList = new List('history', options)
 
@@ -67,9 +69,9 @@ setloginStateChangeEvent(pageInit)
 
 pageInit()
 
-function pageInit () {
+function pageInit() {
   checkIfAuth(
-    data => {
+    (data) => {
       $('.ui-signin').hide()
       $('.ui-or').hide()
       $('.ui-welcome').show()
@@ -116,7 +118,7 @@ $('.ui-history').click(() => {
   }
 })
 
-function checkHistoryList () {
+function checkHistoryList() {
   if ($('#history-list').children().length > 0) {
     $('.pagination').show()
     $('.ui-nohistory').hide()
@@ -124,7 +126,7 @@ function checkHistoryList () {
   } else if ($('#history-list').children().length === 0) {
     $('.pagination').hide()
     $('.ui-nohistory').slideDown()
-    getStorageHistory(data => {
+    getStorageHistory((data) => {
       if (data && data.length > 0 && getLoginState() && historyList.items.length === 0) {
         $('.ui-import-from-browser').slideDown()
       }
@@ -132,11 +134,11 @@ function checkHistoryList () {
   }
 }
 
-function parseHistoryCallback (list, notehistory) {
+function parseHistoryCallback(list, notehistory) {
   checkHistoryList()
   // sort by pinned then timestamp
   list.sort('', {
-    sortFunction (a, b) {
+    sortFunction(a, b) {
       const notea = a.values()
       const noteb = b.values()
       if (notea.pinned && !noteb.pinned) {
@@ -162,8 +164,12 @@ function parseHistoryCallback (list, notehistory) {
       for (let j = 0; j < tags.length; j++) {
         // push info filtertags if not found
         let found = false
-        if (filtertags.includes(tags[j])) { found = true }
-        if (!found) { filtertags.push(tags[j]) }
+        if (filtertags.includes(tags[j])) {
+          found = true
+        }
+        if (!found) {
+          filtertags.push(tags[j])
+        }
       }
     }
   }
@@ -171,7 +177,7 @@ function parseHistoryCallback (list, notehistory) {
 }
 
 // update items whenever list updated
-historyList.on('updated', e => {
+historyList.on('updated', (e) => {
   for (let i = 0, l = e.items.length; i < l; i++) {
     const item = e.items[i]
     if (item.visible()) {
@@ -206,17 +212,19 @@ historyList.on('updated', e => {
   $('.ui-history-pin').on('click', historyPinClick)
 })
 
-function historyCloseClick (e) {
+function historyCloseClick(e) {
   e.preventDefault()
   const id = $(this).closest('a').siblings('span').html()
   const value = historyList.get('id', id)[0]._values
   $('.ui-delete-history-modal-msg').text('Do you really want to delete below history?')
-  $('.ui-delete-history-modal-item').html(`<i class="fa fa-file-text"></i> ${value.text}<br><i class="fa fa-clock-o"></i> ${value.time}`)
+  $('.ui-delete-history-modal-item').html(
+    `<i class="fa fa-file-text"></i> ${value.text}<br><i class="fa fa-clock-o"></i> ${value.time}`
+  )
   clearHistory = false
   deleteId = id
 }
 
-function historyPinClick (e) {
+function historyPinClick(e) {
   e.preventDefault()
   const $this = $(this)
   const id = $this.closest('a').siblings('span').html()
@@ -230,32 +238,47 @@ function historyPinClick (e) {
     pinned = false
     item._values.pinned = false
   }
-  checkIfAuth(() => {
-    postHistoryToServer(id, {
-      pinned
-    }, (err, result) => {
-      if (!err) {
-        if (pinned) { $this.addClass('active') } else { $this.removeClass('active') }
-      }
-    })
-  }, () => {
-    getHistory(notehistory => {
-      for (let i = 0; i < notehistory.length; i++) {
-        if (notehistory[i].id === id) {
-          notehistory[i].pinned = pinned
-          break
+  checkIfAuth(
+    () => {
+      postHistoryToServer(
+        id,
+        {
+          pinned
+        },
+        (err, result) => {
+          if (!err) {
+            if (pinned) {
+              $this.addClass('active')
+            } else {
+              $this.removeClass('active')
+            }
+          }
         }
-      }
-      saveHistory(notehistory)
-      if (pinned) { $this.addClass('active') } else { $this.removeClass('active') }
-    })
-  })
+      )
+    },
+    () => {
+      getHistory((notehistory) => {
+        for (let i = 0; i < notehistory.length; i++) {
+          if (notehistory[i].id === id) {
+            notehistory[i].pinned = pinned
+            break
+          }
+        }
+        saveHistory(notehistory)
+        if (pinned) {
+          $this.addClass('active')
+        } else {
+          $this.removeClass('active')
+        }
+      })
+    }
+  )
 }
 
 // auto update item fromNow every minutes
 setInterval(updateItemFromNow, 60000)
 
-function updateItemFromNow () {
+function updateItemFromNow() {
   const items = $('.item').toArray()
   for (let i = 0; i < items.length; i++) {
     const item = $(items[i])
@@ -267,41 +290,44 @@ function updateItemFromNow () {
 let clearHistory = false
 let deleteId = null
 
-function deleteHistory () {
-  checkIfAuth(() => {
-    deleteServerHistory(deleteId, (err, result) => {
-      if (!err) {
-        if (clearHistory) {
-          historyList.clear()
-          checkHistoryList()
-        } else {
-          historyList.remove('id', deleteId)
-          checkHistoryList()
+function deleteHistory() {
+  checkIfAuth(
+    () => {
+      deleteServerHistory(deleteId, (err, result) => {
+        if (!err) {
+          if (clearHistory) {
+            historyList.clear()
+            checkHistoryList()
+          } else {
+            historyList.remove('id', deleteId)
+            checkHistoryList()
+          }
         }
-      }
-      $('.delete-history-modal').modal('hide')
-      deleteId = null
-      clearHistory = false
-    })
-  }, () => {
-    if (clearHistory) {
-      saveHistory([])
-      historyList.clear()
-      checkHistoryList()
-      deleteId = null
-    } else {
-      if (!deleteId) return
-      getHistory(notehistory => {
-        const newnotehistory = removeHistory(deleteId, notehistory)
-        saveHistory(newnotehistory)
-        historyList.remove('id', deleteId)
+        $('.delete-history-modal').modal('hide')
+        deleteId = null
+        clearHistory = false
+      })
+    },
+    () => {
+      if (clearHistory) {
+        saveHistory([])
+        historyList.clear()
         checkHistoryList()
         deleteId = null
-      })
+      } else {
+        if (!deleteId) return
+        getHistory((notehistory) => {
+          const newnotehistory = removeHistory(deleteId, notehistory)
+          saveHistory(newnotehistory)
+          historyList.remove('id', deleteId)
+          checkHistoryList()
+          deleteId = null
+        })
+      }
+      $('.delete-history-modal').modal('hide')
+      clearHistory = false
     }
-    $('.delete-history-modal').modal('hide')
-    clearHistory = false
-  })
+  )
 }
 
 $('.ui-delete-history-modal-confirm').click(() => {
@@ -315,7 +341,7 @@ $('.ui-import-from-browser').click(() => {
 })
 
 $('.ui-save-history').click(() => {
-  getHistory(data => {
+  getHistory((data) => {
     const history = JSON.stringify(data)
     const blob = new Blob([history], {
       type: 'application/json;charset=utf-8'
@@ -324,7 +350,7 @@ $('.ui-save-history').click(() => {
   })
 })
 
-$('.ui-open-history').bind('change', e => {
+$('.ui-open-history').bind('change', (e) => {
   const files = e.target.files || e.dataTransfer.files
   const file = files[0]
   const reader = new FileReader()
@@ -332,7 +358,7 @@ $('.ui-open-history').bind('change', e => {
     const notehistory = JSON.parse(reader.result)
     // console.log(notehistory);
     if (!reader.result) return
-    getHistory(data => {
+    getHistory((data) => {
       let mergedata = data.concat(notehistory)
       mergedata = clearDuplicatedHistory(mergedata)
       saveHistory(mergedata)
@@ -386,7 +412,7 @@ let filtertags = []
 $('.ui-use-tags').select2({
   placeholder: $('.ui-use-tags').attr('placeholder'),
   multiple: true,
-  data () {
+  data() {
     return {
       results: filtertags
     }
@@ -395,7 +421,7 @@ $('.ui-use-tags').select2({
 $('.select2-input').css('width', 'inherit')
 buildTagsFilter([])
 
-function buildTagsFilter (tags) {
+function buildTagsFilter(tags) {
   for (let i = 0; i < tags.length; i++) {
     tags[i] = {
       id: i,
@@ -407,9 +433,11 @@ function buildTagsFilter (tags) {
 $('.ui-use-tags').on('change', function () {
   const tags = []
   const data = $(this).select2('data')
-  for (let i = 0; i < data.length; i++) { tags.push(data[i].text) }
+  for (let i = 0; i < data.length; i++) {
+    tags.push(data[i].text)
+  }
   if (tags.length > 0) {
-    historyList.filter(item => {
+    historyList.filter((item) => {
       const values = item.values()
       if (!values.tags) return false
       let found = false

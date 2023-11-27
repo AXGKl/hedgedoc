@@ -8,6 +8,7 @@
       "options": {
         "singleQuote": true,
         "printWidth": 92,
+        "trailingComma": "none",
         "semi": false
       }
     }

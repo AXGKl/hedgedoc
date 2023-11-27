@@ -99,7 +99,7 @@ const viewportMargin = 20
 const jumpToAddressBarKeymapName = isMac ? 'Cmd-L' : 'Ctrl-L'
 
 export default class Editor {
-  constructor () {
+  constructor() {
     this.editor = null
     this.jumpToAddressBarKeymapValue = null
     this.defaultExtraKeys = {
@@ -107,7 +107,10 @@ export default class Editor {
         cm.setOption('fullScreen', !cm.getOption('fullScreen'))
       },
       Esc: function (cm) {
-        if (cm.getOption('fullScreen') && !(cm.getOption('keyMap').substr(0, 3) === 'vim')) {
+        if (
+          cm.getOption('fullScreen') &&
+          !(cm.getOption('keyMap').substr(0, 3) === 'vim')
+        ) {
           cm.setOption('fullScreen', false)
         } else {
           return CodeMirror.Pass
@@ -137,8 +140,8 @@ export default class Editor {
         const regex = /^(\s*)(>[> ]*|[*+-]\s|(\d+)([.)]))/
 
         let match
-        const multiple = cm.getSelection().split('\n').length > 1 ||
-          cm.getSelections().length > 1
+        const multiple =
+          cm.getSelection().split('\n').length > 1 || cm.getSelections().length > 1
 
         if (multiple) {
           cm.execCommand('defaultTab')
@@ -172,40 +175,40 @@ export default class Editor {
           return CodeMirror.Pass
         }
       },
-      'Ctrl-*': cm => {
+      'Ctrl-*': (cm) => {
         utils.wrapTextWith(this.editor, cm, '*')
       },
-      'Shift-Ctrl-8': cm => {
+      'Shift-Ctrl-8': (cm) => {
         utils.wrapTextWith(this.editor, cm, '*')
       },
-      'Ctrl-_': cm => {
+      'Ctrl-_': (cm) => {
         utils.wrapTextWith(this.editor, cm, '_')
       },
-      'Shift-Ctrl--': cm => {
+      'Shift-Ctrl--': (cm) => {
         utils.wrapTextWith(this.editor, cm, '_')
       },
-      'Ctrl-~': cm => {
+      'Ctrl-~': (cm) => {
         utils.wrapTextWith(this.editor, cm, '~')
       },
-      'Shift-Ctrl-`': cm => {
+      'Shift-Ctrl-`': (cm) => {
         utils.wrapTextWith(this.editor, cm, '~')
       },
-      'Ctrl-^': cm => {
+      'Ctrl-^': (cm) => {
         utils.wrapTextWith(this.editor, cm, '^')
       },
-      'Shift-Ctrl-6': cm => {
+      'Shift-Ctrl-6': (cm) => {
         utils.wrapTextWith(this.editor, cm, '^')
       },
-      'Ctrl-+': cm => {
+      'Ctrl-+': (cm) => {
         utils.wrapTextWith(this.editor, cm, '+')
       },
-      'Shift-Ctrl-=': cm => {
+      'Shift-Ctrl-=': (cm) => {
         utils.wrapTextWith(this.editor, cm, '+')
       },
-      'Ctrl-=': cm => {
+      'Ctrl-=': (cm) => {
         utils.wrapTextWith(this.editor, cm, '=')
       },
-      'Shift-Ctrl-Backspace': cm => {
+      'Shift-Ctrl-Backspace': (cm) => {
         utils.wrapTextWith(this.editor, cm, 'Backspace')
       }
     }
@@ -213,7 +216,7 @@ export default class Editor {
     this.config = config
   }
 
-  on (event, cb) {
+  on(event, cb) {
     if (!this.eventListeners[event]) {
       this.eventListeners[event] = [cb]
     } else {
@@ -221,11 +224,11 @@ export default class Editor {
     }
 
     this.editor.on(event, (...args) => {
-      this.eventListeners[event].forEach(cb => cb.bind(this)(...args))
+      this.eventListeners[event].forEach((cb) => cb.bind(this)(...args))
     })
   }
 
-  addToolBar () {
+  addToolBar() {
     const inlineAttach = inlineAttachment.editors.codemirror4.attach(this.editor)
     this.toolBar = $(toolBarTemplate)
     this.toolbarPanel = this.editor.addPanel(this.toolBar[0], {
@@ -297,7 +300,10 @@ export default class Editor {
     })
 
     makeTable.click(() => {
-      utils.insertText(this.editor, '\n\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Text     | Text     | Text     |\n')
+      utils.insertText(
+        this.editor,
+        '\n\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Text     | Text     | Text     |\n'
+      )
     })
 
     makeLine.click(() => {
@@ -316,7 +322,7 @@ export default class Editor {
     })
   }
 
-  addStatusBar () {
+  addStatusBar() {
     this.statusBar = $(statusBarTemplate)
     this.statusCursor = this.statusBar.find('.status-cursor > .status-line-column')
     this.statusSelection = this.statusBar.find('.status-cursor > .status-selection')
@@ -339,7 +345,7 @@ export default class Editor {
     this.setPreferences()
   }
 
-  updateStatusBar () {
+  updateStatusBar() {
     if (!this.statusBar) return
 
     const cursor = this.editor.getCursor()
@@ -349,19 +355,28 @@ export default class Editor {
     this.statusFile.text(fileText)
     const docLength = editor.getValue().length
     this.statusLength.text('Length ' + docLength)
-    if (docLength > (config.docmaxlength * 0.95)) {
+    if (docLength > config.docmaxlength * 0.95) {
       this.statusLength.css('color', 'red')
-      this.statusLength.attr('title', 'You have almost reached the limit for this document.')
-    } else if (docLength > (config.docmaxlength * 0.8)) {
+      this.statusLength.attr(
+        'title',
+        'You have almost reached the limit for this document.'
+      )
+    } else if (docLength > config.docmaxlength * 0.8) {
       this.statusLength.css('color', 'orange')
-      this.statusLength.attr('title', 'This document is nearly full, consider splitting it or creating a new one.')
+      this.statusLength.attr(
+        'title',
+        'This document is nearly full, consider splitting it or creating a new one.'
+      )
     } else {
       this.statusLength.css('color', 'white')
-      this.statusLength.attr('title', 'You can write up to ' + config.docmaxlength + ' characters in this document.')
+      this.statusLength.attr(
+        'title',
+        'You can write up to ' + config.docmaxlength + ' characters in this document.'
+      )
     }
   }
 
-  setIndent () {
+  setIndent() {
     const cookieIndentType = Cookies.get('indent_type')
     let cookieTabSize = parseInt(Cookies.get('tab_size'))
     let cookieSpaceUnits = parseInt(Cookies.get('space_units'))
@@ -471,7 +486,7 @@ export default class Editor {
     })
   }
 
-  setKeymap () {
+  setKeymap() {
     const cookieKeymap = Cookies.get('keymap')
     if (cookieKeymap) {
       this.editor.setOption('keyMap', cookieKeymap)
@@ -509,7 +524,7 @@ export default class Editor {
     })
   }
 
-  setTheme () {
+  setTheme() {
     const cookieTheme = Cookies.get('theme')
     if (cookieTheme) {
       this.editor.setOption('theme', cookieTheme)
@@ -546,7 +561,7 @@ export default class Editor {
     checkTheme()
   }
 
-  setSpellcheck () {
+  setSpellcheck() {
     const cookieSpellcheck = Cookies.get('spellcheck')
     if (cookieSpellcheck) {
       let mode = null
@@ -594,37 +609,36 @@ export default class Editor {
 
     // workaround spellcheck might not activate beacuse the ajax loading
     if (window.num_loaded < 2) {
-      const spellcheckTimer = setInterval(
-        () => {
-          if (window.num_loaded >= 2) {
-            if (this.editor.getOption('mode') === 'spell-checker') {
-              this.editor.setOption('mode', 'spell-checker')
-            }
-            clearInterval(spellcheckTimer)
+      const spellcheckTimer = setInterval(() => {
+        if (window.num_loaded >= 2) {
+          if (this.editor.getOption('mode') === 'spell-checker') {
+            this.editor.setOption('mode', 'spell-checker')
           }
-        },
-        100
-      )
+          clearInterval(spellcheckTimer)
+        }
+      }, 100)
     }
   }
 
-  resetEditorKeymapToBrowserKeymap () {
+  resetEditorKeymapToBrowserKeymap() {
     const keymap = this.editor.getOption('keyMap')
     if (!this.jumpToAddressBarKeymapValue) {
-      this.jumpToAddressBarKeymapValue = CodeMirror.keyMap[keymap][jumpToAddressBarKeymapName]
+      this.jumpToAddressBarKeymapValue =
+        CodeMirror.keyMap[keymap][jumpToAddressBarKeymapName]
       delete CodeMirror.keyMap[keymap][jumpToAddressBarKeymapName]
     }
   }
 
-  restoreOverrideEditorKeymap () {
+  restoreOverrideEditorKeymap() {
     const keymap = this.editor.getOption('keyMap')
     if (this.jumpToAddressBarKeymapValue) {
-      CodeMirror.keyMap[keymap][jumpToAddressBarKeymapName] = this.jumpToAddressBarKeymapValue
+      CodeMirror.keyMap[keymap][jumpToAddressBarKeymapName] =
+        this.jumpToAddressBarKeymapValue
       this.jumpToAddressBarKeymapValue = null
     }
   }
 
-  setOverrideBrowserKeymap () {
+  setOverrideBrowserKeymap() {
     const overrideBrowserKeymap = $(
       '.ui-preferences-override-browser-keymap label > input[type="checkbox"]'
     )
@@ -641,13 +655,11 @@ export default class Editor {
     }
   }
 
-  setPreferences () {
+  setPreferences() {
     const overrideBrowserKeymap = $(
       '.ui-preferences-override-browser-keymap label > input[type="checkbox"]'
     )
-    const cookieOverrideBrowserKeymap = Cookies.get(
-      'preferences-override-browser-keymap'
-    )
+    const cookieOverrideBrowserKeymap = Cookies.get('preferences-override-browser-keymap')
     if (cookieOverrideBrowserKeymap && cookieOverrideBrowserKeymap === 'true') {
       overrideBrowserKeymap.prop('checked', true)
     } else {
@@ -660,7 +672,7 @@ export default class Editor {
     })
   }
 
-  init (textit) {
+  init(textit) {
     this.editor = CodeMirror.fromTextArea(textit, {
       mode: defaultEditorMode,
       backdrop: defaultEditorMode,
@@ -682,24 +694,21 @@ export default class Editor {
       },
       autoCloseTags: true,
       foldGutter: true,
-      gutters: [
-        'CodeMirror-linenumbers',
-        'authorship-gutters',
-        'CodeMirror-foldgutter'
-      ],
+      gutters: ['CodeMirror-linenumbers', 'authorship-gutters', 'CodeMirror-foldgutter'],
       extraKeys: this.defaultExtraKeys,
       flattenSpans: true,
       addModeClass: true,
       readOnly: true,
       autoRefresh: true,
       otherCursors: true,
-      placeholder: "← Start by entering a title here\n===\nVisit /features if you don't know what to do.\nHappy hacking :)"
+      placeholder:
+        "← Start by entering a title here\n===\nVisit /features if you don't know what to do.\nHappy hacking :)"
     })
 
     return this.editor
   }
 
-  getEditor () {
+  getEditor() {
     return this.editor
   }
 }

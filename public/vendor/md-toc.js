@@ -4,8 +4,8 @@
  * https://github.com/yijian166/md-toc.js
  */
 
-(function (window) {
-  function Toc (id, options) {
+;(function (window) {
+  function Toc(id, options) {
     this.el = document.getElementById(id)
     if (!this.el) return
     this.options = options || {}
@@ -34,7 +34,10 @@
       }
     }
 
-    this._elTitlesNames.length = this._elTitlesNames.length > this.tocLevel ? this.tocLevel : this._elTitlesNames.length
+    this._elTitlesNames.length =
+      this._elTitlesNames.length > this.tocLevel
+        ? this.tocLevel
+        : this._elTitlesNames.length
 
     for (var j = 0; j < this.elChilds.length; j++) {
       this._elChildName = this.elChilds[j].tagName.toLowerCase()
@@ -44,7 +47,13 @@
     }
   }
 
-  Toc.prototype._createTocContent = function recursiveToc(level = 0, titleElements = [], titleNames = [], ulClass = undefined, index = 0) {
+  Toc.prototype._createTocContent = function recursiveToc(
+    level = 0,
+    titleElements = [],
+    titleNames = [],
+    ulClass = undefined,
+    index = 0
+  ) {
     // Inititalize our elements from the toc object
     // which is only available on level 0
     if (level === 0) {
@@ -64,14 +73,16 @@
     var recurse = false
     var openTag = false
 
-    for (var element; element = titleElements.shift();) {
+    for (var element; (element = titleElements.shift()); ) {
       var elementTag = element.tagName.toLowerCase()
 
       // We only care about tags on our level to add them as list item
       if (elementTag == iterTag) {
         // Let's do some cleaning
         var elementTitle = element.textContent.replace(/"/g, '&quot;')
-        var elementText = (typeof this.process === 'function' ? this.process(element) : element.innerHTML).replace(/<(?:.|\n)*?>/gm, '')
+        var elementText = (
+          typeof this.process === 'function' ? this.process(element) : element.innerHTML
+        ).replace(/<(?:.|\n)*?>/gm, '')
         var id = element.getAttribute('id')
         if (!id) {
           element.setAttribute('id', 'tip' + ++index)
@@ -83,11 +94,12 @@
           content += '</li>\n'
           openTag = false
         }
-        content += '<li><a href="' + id + '" title="'+ elementTitle +'">' + elementText + '</a>'
+        content +=
+          '<li><a href="' + id + '" title="' + elementTitle + '">' + elementText + '</a>'
         // Reset recursion. We need it for the next subsections
         recurse = false
         openTag = true
-      // Check if the current element has a lower level than ours, if so, we have to go down the rabbithole!
+        // Check if the current element has a lower level than ours, if so, we have to go down the rabbithole!
       } else if (!recurse && titleNames.indexOf(elementTag.toLowerCase()) > level) {
         recurse = true
         if (!openTag) {

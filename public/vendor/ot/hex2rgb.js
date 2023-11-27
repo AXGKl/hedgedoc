@@ -1,4 +1,4 @@
-function hex2rgb (hex) {
+function hex2rgb(hex) {
   if (hex[0] == '#') hex = hex.substr(1)
   if (hex.length == 3) {
     var temp = hex

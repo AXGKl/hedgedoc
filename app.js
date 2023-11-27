@@ -64,15 +64,20 @@ if (!config.useSSL && config.protocolUseSSL) {
 }
 
 // check if the request is from container healthcheck
-function isContainerHealthCheck (req, _) {
-  return req.headers['user-agent'] === 'hedgedoc-container-healthcheck/1.0' && req.ip === '127.0.0.1'
+function isContainerHealthCheck(req, _) {
+  return (
+    req.headers['user-agent'] === 'hedgedoc-container-healthcheck/1.0' &&
+    req.ip === '127.0.0.1'
+  )
 }
 
 // logger
-app.use(morgan('combined', {
-  skip: isContainerHealthCheck,
-  stream: logger.stream
-}))
+app.use(
+  morgan('combined', {
+    skip: isContainerHealthCheck,
+    stream: logger.stream
+  })
+)
 
 // Register prometheus metrics endpoint
 if (config.enableStatsApi) {
@@ -102,11 +107,13 @@ app.use(compression())
 
 // use hsts to tell https users stick to this
 if (config.hsts.enable) {
-  app.use(helmet.hsts({
-    maxAge: config.hsts.maxAgeSeconds,
-    includeSubDomains: config.hsts.includeSubdomains,
-    preload: config.hsts.preload
-  }))
+  app.use(
+    helmet.hsts({
+      maxAge: config.hsts.maxAgeSeconds,
+      includeSubDomains: config.hsts.includeSubdomains,
+      preload: config.hsts.preload
+    })
+  )
 } else if (config.useSSL) {
   logger.info('Consider enabling HSTS for extra security:')
   logger.info('https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security')
@@ -125,9 +132,11 @@ app.use(csp.addNonceToLocals)
 // use Content-Security-Policy to limit XSS, dangerous plugins, etc.
 // https://helmetjs.github.io/docs/csp/
 if (config.csp.enable) {
-  app.use(helmet.contentSecurityPolicy({
-    directives: csp.computeDirectives()
-  }))
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: csp.computeDirectives()
+    })
+  )
 } else {
   logger.info('Content-Security-Policy is disabled. This may be a security risk.')
 }
@@ -146,25 +155,54 @@ app.use(i18n.init)
 
 // routes without sessions
 // static files
-app.use('/', express.static(path.join(__dirname, '/public'), { maxAge: config.staticCacheTime, index: false, redirect: false }))
-app.use('/docs', express.static(path.resolve(__dirname, config.docsPath), { maxAge: config.staticCacheTime, redirect: false }))
-app.use('/uploads', express.static(path.resolve(__dirname, config.uploadsPath), { maxAge: config.staticCacheTime, redirect: false }))
-app.use('/default.md', express.static(path.resolve(__dirname, config.defaultNotePath), { maxAge: config.staticCacheTime }))
+app.use(
+  '/',
+  express.static(path.join(__dirname, '/public'), {
+    maxAge: config.staticCacheTime,
+    index: false,
+    redirect: false
+  })
+)
+app.use(
+  '/docs',
+  express.static(path.resolve(__dirname, config.docsPath), {
+    maxAge: config.staticCacheTime,
+    redirect: false
+  })
+)
+app.use(
+  '/uploads',
+  express.static(path.resolve(__dirname, config.uploadsPath), {
+    maxAge: config.staticCacheTime,
+    redirect: false
+  })
+)
+app.use(
+  '/default.md',
+  express.static(path.resolve(__dirname, config.defaultNotePath), {
+    maxAge: config.staticCacheTime
+  })
+)
 
 // session
-app.use(useUnless(['/status', '/metrics'], session({
-  name: config.sessionName,
-  secret: config.sessionSecret,
-  resave: false, // don't save session if unmodified
-  saveUninitialized: true, // always create session to ensure the origin
-  rolling: true, // reset maxAge on every response
-  cookie: {
-    maxAge: config.sessionLife,
-    sameSite: config.cookiePolicy, // be careful: setting a SameSite value of none without https breaks the editor
-    secure: config.useSSL || config.protocolUseSSL || false
-  },
-  store: sessionStore
-})))
+app.use(
+  useUnless(
+    ['/status', '/metrics'],
+    session({
+      name: config.sessionName,
+      secret: config.sessionSecret,
+      resave: false, // don't save session if unmodified
+      saveUninitialized: true, // always create session to ensure the origin
+      rolling: true, // reset maxAge on every response
+      cookie: {
+        maxAge: config.sessionLife,
+        sameSite: config.cookiePolicy, // be careful: setting a SameSite value of none without https breaks the editor
+        secure: config.useSSL || config.protocolUseSSL || false
+      },
+      store: sessionStore
+    })
+  )
+)
 
 // session resumption
 const tlsSessionStore = {}
@@ -243,14 +281,16 @@ app.get('*', function (req, res) {
 // socket.io secure
 io.use(realtime.secure)
 // socket.io auth
-io.use(passportSocketIo.authorize({
-  cookieParser,
-  key: config.sessionName,
-  secret: config.sessionSecret,
-  store: sessionStore,
-  success: realtime.onAuthorizeSuccess,
-  fail: realtime.onAuthorizeFail
-}))
+io.use(
+  passportSocketIo.authorize({
+    cookieParser,
+    key: config.sessionName,
+    secret: config.sessionSecret,
+    store: sessionStore,
+    success: realtime.onAuthorizeSuccess,
+    fail: realtime.onAuthorizeFail
+  })
+)
 // socket.io heartbeat
 io.set('heartbeat interval', config.heartbeatInterval)
 io.set('heartbeat timeout', config.heartbeatTimeout)
@@ -258,7 +298,7 @@ io.set('heartbeat timeout', config.heartbeatTimeout)
 io.sockets.on('connection', realtime.connection)
 
 // listen
-function startListen () {
+function startListen() {
   let address
   const listenCallback = function () {
     const schema = config.useSSL ? 'HTTPS' : 'HTTP'
@@ -278,34 +318,39 @@ function startListen () {
 
 const maxDBTries = 30
 let currentDBTry = 1
-function syncAndListen () {
+function syncAndListen() {
   // sync db then start listen
-  models.sequelize.authenticate().then(function () {
-    models.runMigrations().then(() => {
-      sessionStore.sync()
-      // check if realtime is ready
-      if (realtime.isReady()) {
-        models.Revision.checkAllNotesRevision(function (err, notes) {
-          if (err) throw new Error(err)
-          if (!notes || notes.length <= 0) return startListen()
-        })
+  models.sequelize
+    .authenticate()
+    .then(function () {
+      models.runMigrations().then(() => {
+        sessionStore.sync()
+        // check if realtime is ready
+        if (realtime.isReady()) {
+          models.Revision.checkAllNotesRevision(function (err, notes) {
+            if (err) throw new Error(err)
+            if (!notes || notes.length <= 0) return startListen()
+          })
+        } else {
+          logger.error('server still not ready after db synced')
+          process.exit(1)
+        }
+      })
+    })
+    .catch((dbError) => {
+      if (currentDBTry < maxDBTries) {
+        logger.warn(
+          `Database cannot be reached. Try ${currentDBTry} of ${maxDBTries}. (${dbError})`
+        )
+        currentDBTry++
+        setTimeout(function () {
+          syncAndListen()
+        }, 1000)
       } else {
-        logger.error('server still not ready after db synced')
+        logger.error('Cannot reach database! Exiting.')
         process.exit(1)
       }
     })
-  }).catch((dbError) => {
-    if (currentDBTry < maxDBTries) {
-      logger.warn(`Database cannot be reached. Try ${currentDBTry} of ${maxDBTries}. (${dbError})`)
-      currentDBTry++
-      setTimeout(function () {
-        syncAndListen()
-      }, 1000)
-    } else {
-      logger.error('Cannot reach database! Exiting.')
-      process.exit(1)
-    }
-  })
 }
 syncAndListen()
 
@@ -319,7 +364,7 @@ process.on('uncaughtException', function (err) {
 
 let alreadyHandlingTermSignals = false
 // install exit handler
-function handleTermSignals () {
+function handleTermSignals() {
   if (alreadyHandlingTermSignals) {
     logger.info('Forcefully exiting.')
     process.exit(1)
@@ -337,7 +382,7 @@ function handleTermSignals () {
     }, 0)
   })
   if (config.path) {
-    fs.unlink(config.path, err => {
+    fs.unlink(config.path, (err) => {
       if (err) {
         logger.error(`Could not cleanup socket: ${err.message}`)
       } else {
@@ -357,7 +402,9 @@ function handleTermSignals () {
             currentCleanTry++
             return null
           }
-          logger.error(`Could not save note revisions after ${maxCleanTries} tries! Exiting.`)
+          logger.error(
+            `Could not save note revisions after ${maxCleanTries} tries! Exiting.`
+          )
           process.exit(1)
         }
         if (!notes || notes.length <= 0) {
